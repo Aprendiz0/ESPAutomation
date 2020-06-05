@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>NodeMCU</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        input {
+            width: -webkit-fill-available;
+            height: 40px;
+            background-color: lightgrey;
+            color: #070707;
+            border: 0;
+            margin: 5px;
+            text-align: center;
+        }
+
+        input[type=button] {
+            cursor: pointer;
+            width: -webkit-fill-available;
+            height: 40px;
+            background-color: rgb(0, 180, 150);
+            color: #fafafa;
+            margin: 5px;
+        }
+
+        .container {
+            height: 100%;
+            position: relative;
+        }
+
+        .vertical-center {
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+            width: 100%;
+        }
+
+        .arrow_right {
+            border: solid rgb(0, 120, 100);
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 3px;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            margin: 0 10px;
+        }
+
+        p {
+            cursor: pointer;
+            color: black
+        }
+
+        #wifi_add {
+            text-align: left;
+        }
+
+        .loading {
+            width: 40px;
+            height: 40px;
+            margin: 100px auto;
+            background-color: #333;
+
+            border-radius: 100%;
+            -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+            animation: sk-scaleout 1.0s infinite ease-in-out;
+        }
+
+        @-webkit-keyframes sk-scaleout {
+            0% {
+                -webkit-transform: scale(0)
+            }
+
+            100% {
+                -webkit-transform: scale(1.0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sk-scaleout {
+            0% {
+                -webkit-transform: scale(0);
+                transform: scale(0);
+            }
+
+            100% {
+                -webkit-transform: scale(1.0);
+                transform: scale(1.0);
+                opacity: 0;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+
+            fetch('/wifi/getap')
+                .then(function (x) {
+                    return x.json()
+                })
+                .then(function (r) {
+                    let wifi_list = ""
+
+                    for (const key in r) {
+                        let wifi_name = r[key].name
+                        wifi_list += `<p onclick="(function(){ document.getElementById('ssid').value = '${wifi_name}' })()"><i class="arrow_right"></i>${wifi_name}</p>`
+                    }
+
+                    document.getElementById('wifi_add').innerHTML = wifi_list
+                }).catch(function () {
+                    setTimeout(function () {
+                        alert('Error on request')
+                    }, 100)
+                }).finally(function () {
+                    document.getElementsByClassName('loading')[0].style.display = "none"
+                })
+
+        })()
+
+        function connect() {
+            fetch('/wifi/set', { method: "POST", body: JSON.stringify({ ok: true }) })
+        }
+
+    </script>
+</head>
+
+<body style='margin: 0; background-color: #64646d; color: white; text-align: -webkit-center;'>
+    <div class='container'>
+        <div class='vertical-center'>
+            <div style='width: 300px; background-color: white; padding: 10px; border-top: 5px solid rgb(0, 180, 150);'>
+                <h1 style='color: #070707;'>Wifi config</h1>
+                <div>
+                    <div class="loading"></div>
+                    <div id="wifi_add"></div>
+                </div>
+                <input id="ssid" type='text' placeholder='SSID'><br />
+                <input type='password' placeholder='Password'><br />
+                <input type='button' onclick='connect()' value='Connect'>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
