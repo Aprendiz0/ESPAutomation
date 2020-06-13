@@ -40,20 +40,20 @@ srv:listen(80, function(conn)
 
                 wifi.sta.getap(function(t)
 
-                    res:send('[')
+                    sck:send('[')
                     local isFirst = true
 
                     for name, info in pairs(t) do
                         if not isFirst then
-                            res:send(',')
+                            sck:send(',')
                         else
                             isFirst = false
                         end
-                        res:send('{ "name": "' .. name .. '", "info": "' .. info .. '" }')
+                        sck:send('{ "name": "' .. name .. '", "info": "' .. info .. '" }')
                     end
 
-                    res:send(']')
-                    endWork()
+                    sck:send(']')
+                    finish(sck)
 
                 end)
 

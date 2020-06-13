@@ -100,39 +100,6 @@
             }
         }
     </style>
-    <script>
-        (function () {
-
-            fetch('/wifi/getap')
-                .then(function (x) {
-                    return x.json()
-                })
-                .then(function (r) {
-                    let wifi_list = ""
-
-                    for (const key in r) {
-                        let wifi_name = r[key].name
-                        wifi_list += `<p onclick="(function(){ document.getElementById('ssid').value = '${wifi_name}' })()"><i class="arrow_right"></i>${wifi_name}</p>`
-
-                    }
-
-                    document.getElementById('wifi_add').innerHTML = wifi_list
-
-                }).catch(function () {
-                    setTimeout(function () {
-                        alert('Error on request')
-                    }, 100)
-                }).finally(function () {
-                    document.getElementsByClassName('loading')[0].style.display = "none"
-                })
-
-        })()
-
-        function connect() {
-            fetch('/wifi/set', { method: "POST", body: JSON.stringify({ ok: true }) })
-        }
-
-    </script>
 </head>
 
 <body style='margin: 0; background-color: #64646d; color: white; text-align: -webkit-center;'>
@@ -153,5 +120,41 @@
 
 </body>
 
+<script>
+    (function () {
+
+        fetch('/wifi/getap')
+            .then(function (x) {
+                return x.json()
+            })
+            .then(function (r) {
+                let wifi_list = ""
+
+                for (const key in r) {
+                    let wifi_name = r[key].name
+                    wifi_list += '<p onclick="(function(){ document.getElementById(\'ssid\').value = \''
+                        + wifi_name
+                        + '\' })()"><i class="arrow_right"></i>'
+                        + wifi_name
+                        + '</p>'
+                }
+
+                document.getElementById('wifi_add').innerHTML = wifi_list
+
+            }).catch(function () {
+                setTimeout(function () {
+                    alert('Error on request')
+                }, 100)
+            }).finally(function () {
+                document.getElementsByClassName('loading')[0].style.display = "none"
+            })
+
+    })()
+
+    function connect() {
+        fetch('/wifi/set', { method: "POST", body: JSON.stringify({ ok: true }) })
+    }
+
+</script>
 
 </html>
