@@ -7,4 +7,5 @@ o_wifi.setmode(wifi.STATIONAP)
 o_wifi.setap()
 o_wifi.setsta()
 
-require("http-example")
+require("http_server")
+--require("http-example")

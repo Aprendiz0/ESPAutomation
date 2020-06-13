@@ -33,7 +33,7 @@ function sendPage(c, fileName) -- open file, read a chunk, and send it!
             break
         end -- no more to send. 
         c:send(str)
-        idx = idx + 100
+        idx = idx + 500
     end
 end
 
@@ -56,74 +56,73 @@ require("httpserver").createServer(80, function(req, res)
 
     -- setup handler of body, if any
 
-        req.ondata = function(self, chunk)
-            print("+B", chunk and #chunk, node.heap())
+    req.ondata = function(self, chunk)
+        print("+B", chunk and #chunk, node.heap())
 
-            if not chunk then
+        if not chunk then
 
-                -- control finish to async functions
-                local doFinish = true
+            -- control finish to async functions
+            local doFinish = true
 
-                -- reply
-                res:send(nil, 200)
-                res:send_header("Connection", "close")
+            -- reply
+            res:send(nil, 200)
+            res:send_header("Connection", "close")
 
-                if req.method == "GET" then
+            if req.method == "GET" then
 
-                    -- res:send("Hello, world!\n")
-                    if req.url == url_data.root.url then
-                        sendPage(res, url_data.root.file)
-                    elseif req.url == url_data.wifi.getap.url then
+                -- res:send("Hello, world!\n")
+                if req.url == url_data.root.url then
+                    sendPage(res, url_data.root.file)
+                elseif req.url == url_data.wifi.getap.url then
 
-                        doFinish = nil
+                    doFinish = nil
 
-                        wifi.sta.getap(function(t)
+                    wifi.sta.getap(function(t)
 
-                            res:send('[')
-                            local isFirst = true
+                        res:send('[')
+                        local isFirst = true
 
-                            for name, info in pairs(t) do
-                                if not isFirst then
-                                    res:send(',')
-                                else
-                                    isFirst = false
-                                end
-                                res:send('{ "name": "' .. name .. '", "info": "' .. info .. '" }')
+                        for name, info in pairs(t) do
+                            if not isFirst then
+                                res:send(',')
+                            else
+                                isFirst = false
                             end
+                            res:send('{ "name": "' .. name .. '", "info": "' .. info .. '" }')
+                        end
 
-                            res:send(']')
-                            res:finish()
-                            endWork()
+                        res:send(']')
+                        endWork()
 
-                        end)
+                    end)
 
-                    else
-                        sendPage(res, url_data.not_found.file)
-                    end
+                else
+                    sendPage(res, url_data.not_found.file)
+                end
 
-                elseif req.method == "POST" then
+            elseif req.method == "POST" then
 
-                    if req.url == url_data.wifi.set.url then
+                if req.url == url_data.wifi.set.url then
 
-                        res:send('{ "ok": "true" }')
-
-                    end
+                    res:send('{ "ok": "true" }')
 
                 end
 
-                -- or just do something not waiting till body (if any) comes
-                -- res:finish("Hello, world!")
-                -- res:finish("Salut, monde!")
-
-                if doFinish then
-                    res:finish()
-                    endWork()
-                end
             end
 
+            -- or just do something not waiting till body (if any) comes
+            -- res:finish("Hello, world!")
+            -- res:finish("Salut, monde!")
+
+            if doFinish then
+                endWork()
+            end
         end
 
+    end
+
     function endWork()
+        res:finish()
         req = nil
         res = nil
     end
