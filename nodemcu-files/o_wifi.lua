@@ -30,7 +30,9 @@ o_wifi = {
                 save = false,
                 auto = false
             })
-            wifi.sta.connect()
+            print("connecting to: " .. v_wifi_sta_cfg_ssid)
+            print(wifi.sta.connect())
+            print("connected ", wifi.sta.getip())
         end
     end
 }

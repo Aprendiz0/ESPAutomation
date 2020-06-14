@@ -13,7 +13,11 @@ url_data = {
         set = {
             url = "/wifi/set"
         }
-    }
+    },
+    files = {
+        home = "home.html",
+        wifi_config = "wifi_config.html",
+    } 
 }
 
 srv = net.createServer(net.TCP)
@@ -26,20 +30,19 @@ srv:listen(80, function(conn)
         end
         print("+H", method, path, vars, node.heap())
 
-        sck:send("HTTP/1.1 200 OK\r\n" .. "Server: NodeMCU on ESP8266\r\n" ..
-                     "Content-Type: text/html; charset=UTF-8\r\n\r\n")
         -- sck:send("<h1> Hello, NodeMCU.</h1>")
 
-        --sendfile(sck, "index.html")
+        -- sendfile(sck, "index.html")
 
         if method == "GET" then
 
             if path == url_data.root.url then
-                sendfile(sck, url_data.root.file)
+                sendfile(sck, "text/html", url_data.root.file)
             elseif path == url_data.wifi.getap.url then
 
                 wifi.sta.getap(function(t)
 
+                    sendHeader(sck, "application/json")
                     sck:send('[')
                     local isFirst = true
 
@@ -57,15 +60,21 @@ srv:listen(80, function(conn)
 
                 end)
 
+            elseif path == ("/" .. url_data.files.home) then
+                sendfile(sck, "text/html", url_data.files.home)
+            elseif path == ("/" .. url_data.files.wifi_config) then
+                sendfile(sck, "text/html", url_data.files.wifi_config)
             else
-                sendfile(sck, url_data.not_found.file)
+                sendfile(sck, "text/html", url_data.not_found.file)
             end
 
         elseif method == "POST" then
 
             if path == url_data.wifi.set.url then
-
-                res:send('{ "ok": "true" }')
+                getEncodedJson(request)
+                sendHeader(sck, "application/json")
+                sck:send('{ "ok": "true" }')
+                finish(sck)
 
             end
 
@@ -74,7 +83,7 @@ srv:listen(80, function(conn)
 
 end)
 
-function sendfile(sck, fileName)
+function sendfile(sck, contentType, fileName)
     local function send(localSocket)
         local str = file.readline()
         if str then
@@ -93,4 +102,17 @@ function finish(sck)
     sck:close()
     collectgarbage("collect")
     print("+NS", node.heap())
+end
+
+function sendHeader(sck, contentType)
+
+    sck:send("HTTP/1.1 200 OK\r\n" .. "Server: NodeMCU on ESP8266\r\n" .. "Content-Type: " .. contentType ..
+                 "; charset=UTF-8\r\n\r\n")
+
+end
+
+function getEncodedJson(request)
+    local str = string.match(request, "\r\n\r\n(.*)")
+    print(str)
+    return sjson.decode(str)
 end

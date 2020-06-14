@@ -1,0 +1,66 @@
+<div style='width: 300px; padding: 10px;'>
+    <div>
+        <div id="wifi_load" class="loading"></div>
+        <div id="wifi_add"></div>
+    </div>
+    <input id="ssid" type='text' placeholder='SSID'><br />
+    <input type='password' placeholder='Password'><br />
+    <input type='button' onclick='connect()' value='Connect'>
+</div>
+
+<style>
+    .arrow_right {
+        border: solid rgb(0, 120, 100);
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+        transform: rotate(-45deg);
+        -webkit-transform: rotate(-45deg);
+        margin: 0 10px;
+    }
+
+    p.wifiload {
+        cursor: pointer;
+        color: black
+    }
+
+    #wifi_add {
+        text-align: left;
+    }
+</style>
+
+<script>
+    fetch('/wifi/getap')
+        .then(function (x) {
+            return x.json()
+        })
+        .then(function (r) {
+            let wifi_list = ""
+
+            for (const key in r) {
+                let wifi_name = r[key].name
+                wifi_list += '<p class="wifiload" onclick="(function(){ document.getElementById(\'ssid\').value = \''
+                    + wifi_name
+                    + '\' })()"><i class="arrow_right"></i>'
+                    + wifi_name
+                    + '</p>'
+            }
+
+            document.getElementById('wifi_add').innerHTML = wifi_list
+
+        }).catch(function () {
+            setTimeout(function () {
+                alert('Error on request')
+            }, 100)
+        }).finally(function () {
+            document.getElementById('wifi_load').style.display = "none"
+        })
+
+    function connect() {
+        fetch('/wifi/set', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ok: true })
+        })
+    }
+</script>

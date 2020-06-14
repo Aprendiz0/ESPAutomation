@@ -1,8 +1,0 @@
-.vs/
-*/Win32/
-*/x64/
-
-*.vcxproj.user
-
-*.lua
-*.img

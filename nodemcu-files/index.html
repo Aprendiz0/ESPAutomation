@@ -11,6 +11,7 @@
             width: 100%;
             height: 100%;
             font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
         }
 
         input {
@@ -32,37 +33,38 @@
             margin: 5px;
         }
 
-        .container {
-            height: 100%;
-            position: relative;
-        }
-
-        .vertical-center {
+        ul.nav {
+            list-style-type: none;
             margin: 0;
-            position: absolute;
-            top: 50%;
-            -ms-transform: translateY(-50%);
-            transform: translateY(-50%);
-            width: 100%;
+            padding: 0;
+            width: 200px;
+            background-color: #f1f1f1;
+            position: fixed;
+            height: 100%;
+            overflow: auto;
         }
 
-        .arrow_right {
-            border: solid rgb(0, 120, 100);
-            border-width: 0 3px 3px 0;
-            display: inline-block;
-            padding: 3px;
-            transform: rotate(-45deg);
-            -webkit-transform: rotate(-45deg);
-            margin: 0 10px;
-        }
-
-        p {
+        ul.nav>li>a {
+            display: block;
+            color: #000;
+            padding: 8px 16px;
+            text-decoration: none;
             cursor: pointer;
-            color: black
         }
 
-        #wifi_add {
-            text-align: left;
+        li>a.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        li>a:hover:not(.active) {
+            background-color: #555;
+            color: white;
+        }
+
+        div.nav-container {
+            margin-left: 200px;
+            padding: 1px 16px;
         }
 
         .loading {
@@ -74,6 +76,11 @@
             border-radius: 100%;
             -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
             animation: sk-scaleout 1.0s infinite ease-in-out;
+        }
+
+        .center {
+            display: flex;
+            justify-content: center;
         }
 
         @-webkit-keyframes sk-scaleout {
@@ -99,62 +106,76 @@
                 opacity: 0;
             }
         }
+
+        #pageTitle {
+            color: #070707;
+            border-bottom: 5px solid rgb(0, 180, 150);
+        }
     </style>
 </head>
 
-<body style='margin: 0; background-color: #64646d; color: white; text-align: -webkit-center;'>
-    <div class='container'>
-        <div class='vertical-center'>
-            <div style='width: 300px; background-color: white; padding: 10px; border-top: 5px solid rgb(0, 180, 150);'>
-                <h1 style='color: #070707;'>Wifi config</h1>
-                <div>
-                    <div class="loading"></div>
-                    <div id="wifi_add"></div>
-                </div>
-                <input id="ssid" type='text' placeholder='SSID'><br />
-                <input type='password' placeholder='Password'><br />
-                <input type='button' onclick='connect()' value='Connect'>
-            </div>
-        </div>
+<body>
+
+    <ul class="nav">
+        <li>
+            <a data-load="home.html" data-title="ESPAutomation" onclick="load(this); return false">
+                Home
+            </a>
+        </li>
+        <li>
+            <a data-load="wifi_config.html" data-title="Wifi Config" onclick="load(this); return false">
+                Wifi Config
+            </a>
+        </li>
+    </ul>
+
+    <div class="nav-container">
+        <div id="pageLoad" class="loading" style="display: none;"></div>
+        <h1 id="pageTitle" style="display: none;">Wifi config</h1>
+        <div id="page" class="center"></div>
     </div>
 
 </body>
 
 <script>
-    (function () {
+    function load(e) {
+        let elems = document.querySelectorAll("ul.nav>li>a")
+        for (let i = 0; i < elems.length; i++) {
+            elems[i].classList.remove("active")
+        }
+        e.classList.add("active")
 
-        fetch('/wifi/getap')
+        let pageLoad = document.getElementById("pageLoad")
+        let pageTitle = document.getElementById("pageTitle")
+        let page = document.getElementById("page")
+
+        page.innerHTML = ""
+        pageLoad.style.display = ""
+        pageTitle.style.display = "none"
+
+        fetch(e.dataset.load)
             .then(function (x) {
-                return x.json()
+                return x.text()
             })
             .then(function (r) {
-                let wifi_list = ""
-
-                for (const key in r) {
-                    let wifi_name = r[key].name
-                    wifi_list += '<p onclick="(function(){ document.getElementById(\'ssid\').value = \''
-                        + wifi_name
-                        + '\' })()"><i class="arrow_right"></i>'
-                        + wifi_name
-                        + '</p>'
-                }
-
-                document.getElementById('wifi_add').innerHTML = wifi_list
-
+                page.innerHTML = r
+                let script = document.querySelector("#page>script")
+                if (script) eval(script.text)
             }).catch(function () {
                 setTimeout(function () {
                     alert('Error on request')
                 }, 100)
             }).finally(function () {
-                document.getElementsByClassName('loading')[0].style.display = "none"
+                pageLoad.style.display = "none"
+                pageTitle.innerHTML = e.dataset.title
+                pageTitle.style.display = ""
             })
 
-    })()
-
-    function connect() {
-        fetch('/wifi/set', { method: "POST", body: JSON.stringify({ ok: true }) })
     }
 
+    (function () {
+        load(document.querySelector("ul.nav>li>a"))
+    })()
 </script>
 
 </html>
