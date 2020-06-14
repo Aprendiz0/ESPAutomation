@@ -4,138 +4,145 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>NodeMCU</title>
+    <title>ESPAutomation</title>
     <style>
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-        }
-
-        input {
-            width: -webkit-fill-available;
-            height: 40px;
-            background-color: lightgrey;
-            color: #070707;
-            border: 0;
-            margin: 5px;
-            text-align: center;
-        }
-
-        input[type=button] {
-            cursor: pointer;
-            width: -webkit-fill-available;
-            height: 40px;
-            background-color: rgb(0, 180, 150);
-            color: #fafafa;
-            margin: 5px;
-        }
-
-        ul.nav {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            width: 200px;
-            background-color: #f1f1f1;
-            position: fixed;
-            height: 100%;
-            overflow: auto;
-        }
-
-        ul.nav>li>a {
-            display: block;
-            color: #000;
-            padding: 8px 16px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        li>a.active {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        li>a:hover:not(.active) {
-            background-color: #555;
-            color: white;
-        }
-
-        div.nav-container {
-            margin-left: 200px;
-            padding: 1px 16px;
+        .loading_container {
+            padding-top: 10%;
+            padding-bottom: 10%;
         }
 
         .loading {
-            width: 40px;
-            height: 40px;
-            margin: 100px auto;
-            background-color: #333;
-
-            border-radius: 100%;
-            -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
-            animation: sk-scaleout 1.0s infinite ease-in-out;
+            width: 80px;
+            height: 80px;
+            margin: auto;
         }
 
-        .center {
-            display: flex;
-            justify-content: center;
+        .loading:after {
+            content: " ";
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: auto;
+            border-radius: 50%;
+            border: 6px solid #222;
+            border-color: #222 transparent #222 transparent;
+            animation: loading 1.2s linear infinite;
         }
 
-        @-webkit-keyframes sk-scaleout {
+        @keyframes loading {
             0% {
-                -webkit-transform: scale(0)
+                transform: rotate(0deg);
             }
 
             100% {
-                -webkit-transform: scale(1.0);
-                opacity: 0;
+                transform: rotate(360deg);
             }
-        }
-
-        @keyframes sk-scaleout {
-            0% {
-                -webkit-transform: scale(0);
-                transform: scale(0);
-            }
-
-            100% {
-                -webkit-transform: scale(1.0);
-                transform: scale(1.0);
-                opacity: 0;
-            }
-        }
-
-        #pageTitle {
-            color: #070707;
-            border-bottom: 5px solid rgb(0, 180, 150);
         }
     </style>
 </head>
 
 <body>
+    <div id="render_loading" class="loading_container">
+        <div class="loading"></div>
+    </div>
+    <div id="content" style="display: none;">
+        <ul class="nav">
+            <li>
+                <a data-load="home.html" data-title="ESPAutomation" onclick="load(this); return false">
+                    Home
+                </a>
+            </li>
+            <li>
+                <a data-load="wifi_config.html" data-title="Wifi Config" onclick="load(this); return false">
+                    Wifi Config
+                </a>
+            </li>
+        </ul>
 
-    <ul class="nav">
-        <li>
-            <a data-load="home.html" data-title="ESPAutomation" onclick="load(this); return false">
-                Home
-            </a>
-        </li>
-        <li>
-            <a data-load="wifi_config.html" data-title="Wifi Config" onclick="load(this); return false">
-                Wifi Config
-            </a>
-        </li>
-    </ul>
-
-    <div class="nav-container">
-        <div id="pageLoad" class="loading" style="display: none;"></div>
-        <h1 id="pageTitle" style="display: none;">Wifi config</h1>
-        <div id="page" class="center"></div>
+        <div class="nav-container">
+            <div id="pageLoad" class="loading_container">
+                <div class="loading"></div>
+            </div>
+            <h1 id="pageTitle" style="display: none;"></h1>
+            <div id="page" class="center"></div>
+        </div>
     </div>
 
 </body>
+
+<style>
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+    }
+
+    input {
+        width: -webkit-fill-available;
+        height: 40px;
+        background-color: lightgrey;
+        color: #070707;
+        border: 0;
+        margin: 5px;
+        text-align: center;
+    }
+
+    input[type=button] {
+        cursor: pointer;
+        width: -webkit-fill-available;
+        height: 40px;
+        background-color: rgb(0, 180, 150);
+        color: #fafafa;
+        margin: 5px;
+    }
+
+    ul.nav {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        width: 200px;
+        background-color: #f1f1f1;
+        position: fixed;
+        height: 100%;
+        overflow: auto;
+    }
+
+    ul.nav>li>a {
+        display: block;
+        color: #000;
+        padding: 8px 16px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    li>a.active {
+        background-color: rgb(0, 180, 150);
+        color: white;
+    }
+
+    li>a:hover:not(.active) {
+        background-color: rgb(0, 156, 130);
+        color: white;
+    }
+
+    div.nav-container {
+        margin-left: 200px;
+        padding: 1px 16px;
+    }
+
+    .center {
+        display: flex;
+        justify-content: center;
+    }
+
+    #pageTitle {
+        color: #070707;
+        border-bottom: 5px solid rgb(0, 180, 150);
+        padding: 0 0 10px 10px;
+    }
+</style>
 
 <script>
     function load(e) {
@@ -175,6 +182,8 @@
 
     (function () {
         load(document.querySelector("ul.nav>li>a"))
+        document.getElementById("render_loading").style.display = "none"
+        document.getElementById("content").style.display = ""
     })()
 </script>
 
