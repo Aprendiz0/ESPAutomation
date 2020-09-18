@@ -1,0 +1,78 @@
+<div style="width: 100%;">
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Start event at</th>
+                <th>Start event parameter</th>
+                <th>Event action</th>
+                <th>Event action parameter</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="eventTab"></tbody>
+    </table>
+</div>
+
+<style>
+    table,
+    th,
+    td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 10px;
+    }
+</style>
+
+<script>
+    let evStartOp = [
+        { val: "1", txt: "Time" },
+        { val: "1", txt: "Another event" },
+        { val: "1", txt: "On gpio change" },
+    ];
+
+    getEvents();
+
+    function getEvents() {
+        let eventTab = document.getElementById('eventTab');
+        let tr = createE('tr');
+        let sel
+
+        tr.appendChild(createE('td', '#1'));
+        tr.appendChild(createE('td', '<input type="text">'));
+        tr.appendChild(createE('td', createSel(evStartOp)));
+        tr.appendChild(createE('td', '<input type="text">'));
+        tr.appendChild(createE('td', '<input type="text">'));
+        tr.appendChild(createE('td', '<input type="text">'));
+        tr.appendChild(createE('td', '<td> <a href="#">Edit</a> <a href="#">Remove</a> <a href="#">Save</a> </td>'));
+
+        eventTab.appendChild(tr)
+    }
+
+    function createSel(options, opSelected) {
+        let sel = createE('select');
+        for (const k in options) {
+            let o = options[k];
+            sel.appendChild(cO(o, (o.val === opSelected ? true : false)));
+        }
+        return sel;
+
+        function cO(oEL, selected) {
+            let o = createE('option');
+            o.value = oEL.val;
+            o.innerHTML = oEL.txt;
+            if (selected) o.setAttribute('selected', 'selected');
+            return o;
+        }
+    }
+
+    function createE(str, inner) {
+        let e = document.createElement(str);
+        let tE = typeof inner;
+        if (tE === "object") e.appendChild(inner);
+        else if (tE === "string") e.innerHTML = inner;
+        return e;
+    }
+
+</script>

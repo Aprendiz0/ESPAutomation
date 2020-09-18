@@ -48,23 +48,34 @@
     <div id="content" style="display: none;">
         <ul class="nav">
             <li>
-                <a data-load="home.html" data-title="ESPAutomation" onclick="load(this); return false">
+                <a isSelectable data-load="home.html" data-title="ESPAutomation" onclick="load(this); return false">
                     Home
                 </a>
             </li>
             <li>
-                <a data-load="wifi_config.html" data-title="Wifi Config" onclick="load(this); return false">
+                <a isSelectable data-load="wifi_config.html" data-title="Wifi Config"
+                    onclick="load(this); return false">
                     Wifi Config
+                </a>
+            </li>
+            <li>
+                <a isSelectable data-load="events.html" data-title="Events" onclick="load(this); return false">
+                    Events
+                </a>
+            </li>
+            <li>
+                <a isSelectable href="/eventEdit.html">
+                    Event Edit
                 </a>
             </li>
         </ul>
 
         <div class="nav-container">
-            <div id="pageLoad" class="loading_container">
+            <div data-nav_load class="loading_container">
                 <div class="loading"></div>
             </div>
-            <h1 id="pageTitle" style="display: none;"></h1>
-            <div id="page" class="center"></div>
+            <h1 data-nav_title style="display: none;"></h1>
+            <div data-nav_page class="center"></div>
         </div>
     </div>
 
@@ -111,10 +122,18 @@
 
     ul.nav>li>a {
         display: block;
-        color: #000;
-        padding: 8px 16px;
+        color: #555;
         text-decoration: none;
+        padding: 8px 16px;
+    }
+
+    ul.nav>li>a[isSelectable] {
         cursor: pointer;
+        color: #000;
+    }
+
+    ul.nav>li {
+        margin: 3px 0;
     }
 
     li>a.active {
@@ -122,9 +141,15 @@
         color: white;
     }
 
-    li>a:hover:not(.active) {
+    li>a[isSelectable]:hover:not(.active) {
         background-color: rgb(0, 156, 130);
         color: white;
+    }
+
+    li.separator {
+        width: 100%;
+        height: 2px;
+        background-color: #000;
     }
 
     div.nav-container {
@@ -137,7 +162,7 @@
         justify-content: center;
     }
 
-    #pageTitle {
+    [data-nav_title] {
         color: #070707;
         border-bottom: 5px solid rgb(0, 180, 150);
         padding: 0 0 10px 10px;
@@ -146,15 +171,17 @@
 
 <script>
     function load(e) {
-        let elems = document.querySelectorAll("ul.nav>li>a")
+        let elems = document.querySelectorAll("ul.nav>li>a[isSelectable]")
         for (let i = 0; i < elems.length; i++) {
             elems[i].classList.remove("active")
         }
         e.classList.add("active")
 
-        let pageLoad = document.getElementById("pageLoad")
-        let pageTitle = document.getElementById("pageTitle")
-        let page = document.getElementById("page")
+        let navC = findParent(e, '.nav-container')
+
+        let pageLoad = navC.querySelector('[data-nav_load]')
+        let pageTitle = navC.querySelector('[data-nav_title]')
+        let page = navC.querySelector('[data-nav_page]')
 
         page.innerHTML = ""
         pageLoad.style.display = ""
@@ -166,8 +193,12 @@
             })
             .then(function (r) {
                 page.innerHTML = r
-                let script = document.querySelector("#page>script")
-                if (script) eval(script.text)
+                let script = page.querySelector("script");
+                if (script) {
+                    setTimeout(function () {
+                        eval.apply(null, [script.text]);
+                    }, 0)
+                }
             }).catch(function () {
                 setTimeout(function () {
                     alert('Error on request')
@@ -180,8 +211,15 @@
 
     }
 
+    function findParent(eThis, qSelector) {
+        if (!eThis.parentElement) return;
+        let el = eThis.parentElement.querySelector(qSelector);
+        if (el) return el;
+        else return findParent(eThis.parentElement, qSelector);
+    }
+
     (function () {
-        load(document.querySelector("ul.nav>li>a"))
+        load(document.querySelector("ul.nav>li>a[isSelectable]"))
         document.getElementById("render_loading").style.display = "none"
         document.getElementById("content").style.display = ""
     })()
