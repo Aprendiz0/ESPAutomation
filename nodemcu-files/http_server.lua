@@ -1,30 +1,17 @@
 url_data = {
-    root = {
-        url = "/",
-        file = "index.html"
-    },
-    not_found = {
-        file = "not_found.html"
-    },
-    wifi = {
-        getap = {
-            url = "/wifi/getap"
-        },
-        set = {
-            url = "/wifi/set"
-        }
-    },
-    files = {
-        home = "home.html",
-        wifi_config = "wifi_config.html",
-    } 
+    root = {url = "/", file = "events.html"},
+    not_found = {file = "not_found.html"},
+    wifi = {getap = {url = "/wifi/getap"}, set = {url = "/wifi/set"}},
+    files = {home = "home.html", wifi_config = "wifi_config.html"},
+    events = {set = "/events/set"}
 }
 
 srv = net.createServer(net.TCP)
 
 srv:listen(80, function(conn)
     conn:on("receive", function(sck, request)
-        local _, _, method, path, vars = string.find(request, "([A-Z]+) (.+)?(.+) HTTP");
+        local _, _, method, path, vars =
+            string.find(request, "([A-Z]+) (.+)?(.+) HTTP");
         if (method == nil) then
             _, _, method, path = string.find(request, "([A-Z]+) (.+) HTTP");
         end
@@ -52,7 +39,9 @@ srv:listen(80, function(conn)
                         else
                             isFirst = false
                         end
-                        sck:send('{ "name": "' .. name .. '", "info": "' .. info .. '" }')
+                        sck:send(
+                            '{ "name": "' .. name .. '", "info": "' .. info ..
+                                '" }')
                     end
 
                     sck:send(']')
@@ -75,7 +64,16 @@ srv:listen(80, function(conn)
                 sendHeader(sck, "application/json")
                 sck:send('{ "ok": "true" }')
                 finish(sck)
-
+            elseif path == url_data.events.set then
+                for i, line in ipairs(getEncodedJson(request)) do
+                    print(i)
+                    print(sjson.encode(line))
+                    print(line["id"])
+                    print(line.id)
+                end
+                sendHeader(sck, "application/json")
+                sck:send('{ "ok": "true" }')
+                finish(sck)
             end
 
         end
@@ -106,8 +104,8 @@ end
 
 function sendHeader(sck, contentType)
 
-    sck:send("HTTP/1.1 200 OK\r\n" .. "Server: NodeMCU on ESP8266\r\n" .. "Content-Type: " .. contentType ..
-                 "; charset=UTF-8\r\n\r\n")
+    sck:send("HTTP/1.1 200 OK\r\n" .. "Server: NodeMCU on ESP8266\r\n" ..
+                 "Content-Type: " .. contentType .. "; charset=UTF-8\r\n\r\n")
 
 end
 

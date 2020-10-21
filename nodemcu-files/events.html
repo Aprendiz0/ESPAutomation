@@ -1,78 +1,323 @@
-<div style="width: 100%;">
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Start event at</th>
-                <th>Start event parameter</th>
-                <th>Event action</th>
-                <th>Event action parameter</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="eventTab"></tbody>
-    </table>
-</div>
+<!DOCTYPE html>
+<html lang="en">
 
-<style>
-    table,
-    th,
-    td {
-        border: 1px solid black;
-        border-collapse: collapse;
-        padding: 10px;
-    }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPAutomation - Events</title>
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        td {
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        a {
+            cursor: pointer;
+            color: blue;
+        }
+
+        #inScreen {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100px;
+            text-align: center;
+        }
+
+        #inScreen>div {
+            margin: 30px 10px 10px 10px;
+            padding: 30px;
+            min-width: 100px;
+            background-color: white;
+            border: 1px solid;
+            display: inline-block;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div style="padding: 10px;">
+        <h1>Events</h1>
+        <br />
+
+        <p>
+            <a onclick="addEvent()">Adcionar</a>
+            <br />
+            <br />
+            <a onclick="save()">Salvar</a>
+        </p>
+
+        <br />
+        <br />
+        <table>
+            <thead>
+                <tr>
+                    <td>Id</td>
+                    <td>Nome</td>
+                    <td>Inicio em</td>
+                    <td>Ação</td>
+                    <td> -- </td>
+                </tr>
+            </thead>
+            <tbody id="prinpipalTable">
+
+            </tbody>
+        </table>
+    </div>
+
+    <div id="inScreen" style="display: none;">
+        <div>
+            <h3>Confirme os dados</h3>
+            <pre id="printJson"></pre>
+            <br />
+            <p>
+                <a onclick="cancel()">Cancel</a>
+                &nbsp; &nbsp; &nbsp;
+                <a onclick="doSave()">Salvar</a>
+            </p>
+        </div>
+    </div>
+</body>
 
 <script>
-    let evStartOp = [
-        { val: "1", txt: "Time" },
-        { val: "1", txt: "Another event" },
-        { val: "1", txt: "On gpio change" },
-    ];
 
-    getEvents();
+    const eventLineStructure = `
+        <tr id="eventLine_&1">
+            <td><input type="text" id="id_&1" value=""></td>
+            <td><input type="text" id="name_&1"></td>
+            <td>
+                Condição de inicio: 
+                <select id="condicion_&1">
+                    <option value="" selected>Selecione</option>
+                    <option value="0">and</option>
+                    <option value="1">or</option>
+                </select>
+                <br />
+                <br />
+                <a onclick="addStart('&1')">Adcionar</a>
+                <br />
+                <br />
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Tipo</td>
+                            <td>Parametros</td>
+                            <td> -- </td>
+                        </tr>
+                    </thead>
+                    <tbody id="startTable_&1"></tbody>
+                </table>
+            </td>
+            <td>
+                <br />
+                <br />
+                <a onclick="addAction('&1')">Adcionar</a>
+                <br />
+                <br />
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Tipo</td>
+                            <td>Parametros</td>
+                            <td> -- </td>
+                        </tr>
+                    </thead>
+                    <tbody id="actionTable_&1"></tbody>
+                </table>
+            </td>
+            <td>
+                <a onclick="removeEvent('&1')">Deletar</a>
+            </td>
+        </tr>
+    `;
 
-    function getEvents() {
-        let eventTab = document.getElementById('eventTab');
-        let tr = createE('tr');
-        let sel
+    const eventStartStructure = `
+        <tr id="startLine_&1_&2">
+            <td>
+                <select id="startType_&1_&2">
+                    <option value="" selected>Selecione</option>
+                    <option value="0">alone</option>
+                    <option value="1">gpioRead</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" id="startParam_&1_&2">
+            </td>
+            <td>
+                <a onclick="removeStart('&1','&2')">Deletar</a>
+            </td>
+        </tr>
+    `;
 
-        tr.appendChild(createE('td', '#1'));
-        tr.appendChild(createE('td', '<input type="text">'));
-        tr.appendChild(createE('td', createSel(evStartOp)));
-        tr.appendChild(createE('td', '<input type="text">'));
-        tr.appendChild(createE('td', '<input type="text">'));
-        tr.appendChild(createE('td', '<input type="text">'));
-        tr.appendChild(createE('td', '<td> <a href="#">Edit</a> <a href="#">Remove</a> <a href="#">Save</a> </td>'));
+    const eventActionStructure = `
+        <tr id="actionLine_&1_&2">
+            <td>
+                <select id="actionType_&1_&2">
+                    <option value="" selected>Selecione</option>
+                    <option value="0">gpioWrite</option>
+                    <option value="1">Dispacth event</option>
+                </select>
+            </td>
+            <td>
+                <input type="text" id="actionParam_&1_&2">
+            </td>
+            <td>
+                <a onclick="removeAction('&1','&2')">Deletar</a>
+            </td>
+        </tr>
+    `;
 
-        eventTab.appendChild(tr)
+    let eventsRegistred = [];
+    let counts = {
+        eventId: 0,
+        startId: 0,
+        actionId: 0,
     }
 
-    function createSel(options, opSelected) {
-        let sel = createE('select');
-        for (const k in options) {
-            let o = options[k];
-            sel.appendChild(cO(o, (o.val === opSelected ? true : false)));
-        }
-        return sel;
-
-        function cO(oEL, selected) {
-            let o = createE('option');
-            o.value = oEL.val;
-            o.innerHTML = oEL.txt;
-            if (selected) o.setAttribute('selected', 'selected');
-            return o;
-        }
+    function getEId(id, comp) {
+        let idE = id;
+        if (typeof comp != 'undefined') idE += comp.toString();
+        return document.getElementById(idE);
     }
 
-    function createE(str, inner) {
-        let e = document.createElement(str);
-        let tE = typeof inner;
-        if (tE === "object") e.appendChild(inner);
-        else if (tE === "string") e.innerHTML = inner;
-        return e;
+    function addEvent() {
+        let event = {
+            id: counts.eventId++,
+            starts: [],
+            actions: []
+        };
+
+        getEId('prinpipalTable')
+            .insertAdjacentHTML('beforeend',
+                eventLineStructure.replace(/&1/g, event.id));
+        eventsRegistred[event.id.toString()] = event;
+    }
+
+    function addStart(evId) {
+        let startId = counts.startId++
+
+        getEId('startTable_' + evId)
+            .insertAdjacentHTML('beforeend',
+                eventStartStructure.replace(/&1/g, evId).replace(/&2/g, startId));
+
+        eventsRegistred[evId].starts[startId] = startId;
+    }
+
+    function addAction(evId) {
+        let actionId = counts.actionId++
+
+        getEId('actionTable_' + evId).insertAdjacentHTML('beforeend',
+            eventActionStructure.replace(/&1/g, evId).replace(/&2/g, actionId));
+
+        eventsRegistred[evId].actions[actionId] = actionId;
+    }
+
+    function removeStart(evId, stId) {
+        getEId('startLine_' + evId + '_' + stId).remove();
+        delete eventsRegistred[evId].actions[stId];
+    }
+
+    function removeAction(evId, stId) {
+        getEId('actionLine_' + evId + '_' + stId).remove();
+        delete eventsRegistred[evId].actions[stId];
+    }
+
+    function removeEvent(evId) {
+        getEId('eventLine_' + evId).remove();
+        delete eventsRegistred[evId];
+    }
+
+    function getEventsStructure() {
+
+        eventsReg = [];
+
+        for (const eKey in eventsRegistred) {
+            const eventKey = eventsRegistred[eKey];
+            const eId = eventKey.id;
+            const eventId = getEId('id_', eId).value;
+
+            if (eventId === "") continue;
+
+            let event = {
+                id: eventId,
+                name: getEId('name_', eId).value,
+                startCondition: getEId('condicion_', eId).value,
+                starts: [],
+                actions: []
+            }
+
+            for (const sKey in eventKey.starts) {
+                const startKey = eventKey.starts[sKey];
+                const startType = getEId('startType_', (eId + '_' + startKey)).value;
+
+                if (startType === "") continue;
+
+                event.starts.push({
+                    //id: startKey,
+                    type: startType,
+                    param: getEId('startParam_', (eId + '_' + startKey)).value
+                })
+            }
+
+            for (const aKey in eventKey.actions) {
+                const actionKey = eventKey.actions[aKey];
+                const actionType = getEId('actionType_', (eId + '_' + actionKey)).value;
+
+                if (actionType === "") continue;
+
+                event.actions.push({
+                    //id: actionKey,
+                    type: actionType,
+                    param: getEId('actionParam_', (eId + '_' + actionKey)).value
+                })
+            }
+
+            eventsReg.push(event);
+        }
+
+        return eventsReg;
+
+    }
+
+    function save() {
+        getEId('inScreen').style.display = "";
+        getEId('printJson').textContent = JSON.stringify(getEventsStructure(), undefined, 2);
+    }
+
+    function cancel() {
+        getEId('inScreen').style.display = "none";
+        getEId('printJson').textContent = ""
+    }
+
+    function doSave() {
+        fetch('events/set', { method: 'POST', body: JSON.stringify(getEventsStructure()) })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (rjson) {
+                console.log(rjson)
+            });
+        //alert('Aguarde a página se atualizar');
+        //window.location.reload();
     }
 
 </script>
+
+</html>
