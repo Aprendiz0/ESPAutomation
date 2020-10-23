@@ -22,7 +22,7 @@ event = {}
 
 event.constants = {
     eventStartCondition = {if_and = 0, if_or = 1},
-    eventStart = {allone = 0, gpioRead = 1},
+    eventStart = {alone = 0, gpioRead = 1},
     eventAction = {gpioWrite = 0, dispatch = 1}
 }
 
@@ -113,7 +113,11 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
 
         local eventStartFunction = nil
 
-        if value.event == event.constants.eventStart.gpioRead then
+        if value.event == event.constants.eventStart.alone then
+
+            eventStartFunction = function() return true end
+
+        elseif value.event == event.constants.eventStart.gpioRead then
 
             eventStartFunction = function()
                 gpio.mode(value.param.pin, gpio.INPUT)
@@ -164,7 +168,7 @@ end
 -- teste do evento
 print("--- criando evento 1")
 local eventoTeste = event.new(1, "teste", nil, {
-    {event = event.constants.eventStart.allone, param = nil}
+    {event = event.constants.eventStart.alone, param = nil}
 }, {
     {
         event = event.constants.eventAction.gpioWrite,
@@ -187,7 +191,7 @@ event.dispatch(1)
 -- teste do evento
 print("--- criando evento 2")
 local eventoTeste2 = event.new(2, "teste 2", nil, {
-    {event = event.constants.eventStart.allone, param = nil}
+    {event = event.constants.eventStart.alone, param = nil}
 }, {
     {
         event = event.constants.eventAction.dispatch,

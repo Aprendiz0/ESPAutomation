@@ -58,10 +58,10 @@
         <br />
 
         <p>
-            <a onclick="addEvent()">Adcionar</a>
+            <a onclick="addEvent()">Add</a>
             <br />
             <br />
-            <a onclick="save()">Salvar</a>
+            <a onclick="save()">Save</a>
         </p>
 
         <br />
@@ -69,10 +69,10 @@
         <table>
             <thead>
                 <tr>
-                    <td>Id</td>
-                    <td>Nome</td>
-                    <td>Inicio em</td>
-                    <td>Ação</td>
+                    <td>Event Id</td>
+                    <td>Name</td>
+                    <td>Start in</td>
+                    <td>Action</td>
                     <td> -- </td>
                 </tr>
             </thead>
@@ -84,13 +84,13 @@
 
     <div id="inScreen" style="display: none;">
         <div>
-            <h3>Confirme os dados</h3>
+            <h3>Confirm the data</h3>
             <pre id="printJson"></pre>
             <br />
             <p>
                 <a onclick="cancel()">Cancel</a>
                 &nbsp; &nbsp; &nbsp;
-                <a onclick="doSave()">Salvar</a>
+                <a onclick="doSave()">Save</a>
             </p>
         </div>
     </div>
@@ -103,22 +103,22 @@
             <td><input type="text" id="id_&1" value=""></td>
             <td><input type="text" id="name_&1"></td>
             <td>
-                Condição de inicio: 
+                Start condition: 
                 <select id="condicion_&1">
-                    <option value="" selected>Selecione</option>
+                    <option value="" selected>Select one</option>
                     <option value="0">and</option>
                     <option value="1">or</option>
                 </select>
                 <br />
                 <br />
-                <a onclick="addStart('&1')">Adcionar</a>
+                <a onclick="addStart('&1')">Add</a>
                 <br />
                 <br />
                 <table>
                     <thead>
                         <tr>
-                            <td>Tipo</td>
-                            <td>Parametros</td>
+                            <td>Type</td>
+                            <td>Parameters</td>
                             <td> -- </td>
                         </tr>
                     </thead>
@@ -128,14 +128,14 @@
             <td>
                 <br />
                 <br />
-                <a onclick="addAction('&1')">Adcionar</a>
+                <a onclick="addAction('&1')">Add</a>
                 <br />
                 <br />
                 <table>
                     <thead>
                         <tr>
-                            <td>Tipo</td>
-                            <td>Parametros</td>
+                            <td>Type</td>
+                            <td>Parameters</td>
                             <td> -- </td>
                         </tr>
                     </thead>
@@ -143,7 +143,7 @@
                 </table>
             </td>
             <td>
-                <a onclick="removeEvent('&1')">Deletar</a>
+                <a onclick="removeEvent('&1')">Delete</a>
             </td>
         </tr>
     `;
@@ -152,16 +152,15 @@
         <tr id="startLine_&1_&2">
             <td>
                 <select id="startType_&1_&2">
-                    <option value="" selected>Selecione</option>
+                    <option value="" selected>Select one</option>
                     <option value="0">alone</option>
                     <option value="1">gpioRead</option>
                 </select>
             </td>
-            <td>
-                <input type="text" id="startParam_&1_&2">
+            <td id="startParamTd_&1_&2">
             </td>
             <td>
-                <a onclick="removeStart('&1','&2')">Deletar</a>
+                <a onclick="removeStart('&1','&2')">Delete</a>
             </td>
         </tr>
     `;
@@ -170,18 +169,27 @@
         <tr id="actionLine_&1_&2">
             <td>
                 <select id="actionType_&1_&2">
-                    <option value="" selected>Selecione</option>
+                    <option value="" selected>Select one</option>
                     <option value="0">gpioWrite</option>
                     <option value="1">Dispacth event</option>
                 </select>
             </td>
-            <td>
-                <input type="text" id="actionParam_&1_&2">
+            <td id="actionParamTd_&1_&2">
             </td>
             <td>
-                <a onclick="removeAction('&1','&2')">Deletar</a>
+                <a onclick="removeAction('&1','&2')">Delete</a>
             </td>
         </tr>
+    `;
+
+    const eventActionDispacthEventStructure = `
+                <input type="text" name="val" placeholder="Event Id">
+    `;
+
+    const eventStartActionGpioStructure = `
+                <input type="text" name="pin" placeholder="pin">
+                <br />
+                <input type="text" name="val" placeholder="val">
     `;
 
     let eventsRegistred = [];
@@ -191,10 +199,14 @@
         actionId: 0,
     }
 
-    function getEId(id, comp) {
+    function getEId(id, comp, eName) {
         let idE = id;
         if (typeof comp != 'undefined') idE += comp.toString();
-        return document.getElementById(idE);
+
+        if (typeof eName === 'undefined')
+            return document.getElementById(idE);
+        else
+            return document.querySelectorAll(('#' + idE + ' > ' + eName));
     }
 
     function addEvent() {
@@ -217,6 +229,20 @@
             .insertAdjacentHTML('beforeend',
                 eventStartStructure.replace(/&1/g, evId).replace(/&2/g, startId));
 
+        let paramTd = getEId('startParamTd_', (evId + '_' + startId))
+        paramTd.innerHTML = '';
+
+        getEId('startType_' + evId + '_' + startId).addEventListener("change", function () {
+            paramTd.innerHTML = '';
+            switch (this.value) {
+                case '1':
+                    paramTd.innerHTML = eventStartActionGpioStructure;
+                    break;
+                default:
+                    break;
+            }
+        })
+
         eventsRegistred[evId].starts[startId] = startId;
     }
 
@@ -225,6 +251,22 @@
 
         getEId('actionTable_' + evId).insertAdjacentHTML('beforeend',
             eventActionStructure.replace(/&1/g, evId).replace(/&2/g, actionId));
+
+        let paramTd = getEId('actionParamTd_', (evId + '_' + actionId))
+
+        getEId('actionType_' + evId + '_' + actionId).addEventListener("change", function () {
+            paramTd.innerHTML = '';
+            switch (this.value) {
+                case '0':
+                    paramTd.innerHTML = eventStartActionGpioStructure;
+                    break;
+                case '1':
+                    paramTd.innerHTML = eventActionDispacthEventStructure;
+                    break;
+                default:
+                    break;
+            }
+        })
 
         eventsRegistred[evId].actions[actionId] = actionId;
     }
@@ -272,8 +314,20 @@
                 event.starts.push({
                     //id: startKey,
                     type: startType,
-                    param: getEId('startParam_', (eId + '_' + startKey)).value
+                    param: getStartParam()
                 })
+
+                function getStartParam() {
+                    let r = {}
+                    let ips = getEId('startParamTd_', (eId + '_' + startKey), 'input');
+
+                    for (let k = 0; k < ips.length; k++) {
+                        const ip = ips[k];
+                        r[ip.name] = ip.value;
+                    }
+
+                    return r
+                }
             }
 
             for (const aKey in eventKey.actions) {
@@ -287,6 +341,18 @@
                     type: actionType,
                     param: getEId('actionParam_', (eId + '_' + actionKey)).value
                 })
+
+                function getActionParam() {
+                    let r = {}
+                    let ips = getEId('startParamTd_', (eId + '_' + startKey), 'input');
+
+                    for (let k = 0; k < ips.length; k++) {
+                        const ip = ips[k];
+                        r[ip.name] = ip.value;
+                    }
+
+                    return r
+                }
             }
 
             eventsReg.push(event);
