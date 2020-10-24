@@ -57,29 +57,31 @@
         <h1>Events</h1>
         <br />
 
-        <p>
-            <a onclick="addEvent()">Add</a>
+        <form onsubmit="event.preventDefault(); save()">
+            <p>
+                <button onclick="addEvent()">Add</button>
+                <br />
+                <br />
+                <button type="submit">Save</button>
+            </p>
+
             <br />
             <br />
-            <a onclick="save()">Save</a>
-        </p>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Event Id</td>
+                        <td>Name</td>
+                        <td>Start in</td>
+                        <td>Action</td>
+                        <td> -- </td>
+                    </tr>
+                </thead>
+                <tbody id="prinpipalTable">
 
-        <br />
-        <br />
-        <table>
-            <thead>
-                <tr>
-                    <td>Event Id</td>
-                    <td>Name</td>
-                    <td>Start in</td>
-                    <td>Action</td>
-                    <td> -- </td>
-                </tr>
-            </thead>
-            <tbody id="prinpipalTable">
-
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </form>
     </div>
 
     <div id="inScreen" style="display: none;">
@@ -88,9 +90,9 @@
             <pre id="printJson"></pre>
             <br />
             <p>
-                <a onclick="cancel()">Cancel</a>
+                <button onclick="cancel()">Cancel</button>
                 &nbsp; &nbsp; &nbsp;
-                <a onclick="doSave()">Save</a>
+                <button onclick="doSave()">Save</button>
             </p>
         </div>
     </div>
@@ -100,18 +102,17 @@
 
     const eventLineStructure = `
         <tr id="eventLine_&1">
-            <td><input type="text" id="id_&1" value=""></td>
-            <td><input type="text" id="name_&1"></td>
+            <td><input type="text" id="id_&1" value="" required></td>
+            <td><input type="text" id="name_&1" required></td>
             <td>
                 Start condition: 
                 <select id="condicion_&1">
-                    <option value="" selected>Select one</option>
-                    <option value="0">and</option>
+                    <option value="0" selected>and</option>
                     <option value="1">or</option>
                 </select>
                 <br />
                 <br />
-                <a onclick="addStart('&1')">Add</a>
+                <button onclick="addStart('&1')">Add</button>
                 <br />
                 <br />
                 <table>
@@ -128,7 +129,7 @@
             <td>
                 <br />
                 <br />
-                <a onclick="addAction('&1')">Add</a>
+                <button onclick="addAction('&1')">Add</button>
                 <br />
                 <br />
                 <table>
@@ -143,7 +144,7 @@
                 </table>
             </td>
             <td>
-                <a onclick="removeEvent('&1')">Delete</a>
+                <button onclick="removeEvent('&1')">Delete</button>
             </td>
         </tr>
     `;
@@ -151,8 +152,8 @@
     const eventStartStructure = `
         <tr id="startLine_&1_&2">
             <td>
-                <select id="startType_&1_&2">
-                    <option value="" selected>Select one</option>
+                <select id="startType_&1_&2" required>
+                    <option selected>Select one</option>
                     <option value="0">alone</option>
                     <option value="1">gpioRead</option>
                 </select>
@@ -160,7 +161,7 @@
             <td id="startParamTd_&1_&2">
             </td>
             <td>
-                <a onclick="removeStart('&1','&2')">Delete</a>
+                <button onclick="removeStart('&1','&2')">Delete</button>
             </td>
         </tr>
     `;
@@ -168,8 +169,8 @@
     const eventActionStructure = `
         <tr id="actionLine_&1_&2">
             <td>
-                <select id="actionType_&1_&2">
-                    <option value="" selected>Select one</option>
+                <select id="actionType_&1_&2" required>
+                    <option selected>Select one</option>
                     <option value="0">gpioWrite</option>
                     <option value="1">Dispacth event</option>
                 </select>
@@ -177,19 +178,19 @@
             <td id="actionParamTd_&1_&2">
             </td>
             <td>
-                <a onclick="removeAction('&1','&2')">Delete</a>
+                <button onclick="removeAction('&1','&2')">Delete</button>
             </td>
         </tr>
     `;
 
     const eventActionDispacthEventStructure = `
-                <input type="text" name="val" placeholder="Event Id">
+                <input class="is-value" type="text" name="val" placeholder="Event Id" required>
     `;
 
     const eventStartActionGpioStructure = `
-                <input type="text" name="pin" placeholder="pin">
+                <input class="is-value" type="text" name="pin" placeholder="pin" required>
                 <br />
-                <input type="text" name="val" placeholder="val">
+                <input class="is-value" type="text" name="val" placeholder="val" required>
     `;
 
     let eventsRegistred = [];
@@ -319,7 +320,7 @@
 
                 function getStartParam() {
                     let r = {}
-                    let ips = getEId('startParamTd_', (eId + '_' + startKey), 'input');
+                    let ips = getEId('startParamTd_', (eId + '_' + startKey), '.is-value');
 
                     for (let k = 0; k < ips.length; k++) {
                         const ip = ips[k];
@@ -344,7 +345,7 @@
 
                 function getActionParam() {
                     let r = {}
-                    let ips = getEId('startParamTd_', (eId + '_' + startKey), 'input');
+                    let ips = getEId('startParamTd_', (eId + '_' + startKey), '.is-value');
 
                     for (let k = 0; k < ips.length; k++) {
                         const ip = ips[k];
@@ -373,14 +374,19 @@
     }
 
     function doSave() {
+        alert('Wait for a response from the server');
         fetch('events/set', { method: 'POST', body: JSON.stringify(getEventsStructure()) })
             .then(function (response) {
-                return response.json();
+                if (response.ok) {
+                    response.json().then(function (rjson) {
+                        alert("Success:\n" + JSON.stringify(rjson))
+                    }).catch(function (err) {
+                        alert('Error on call return:\n' + err)
+                    })
+                } else {
+                    alert('Error on call \nStatus: ' + response.status + ': ' + response.statusText)
+                }
             })
-            .then(function (rjson) {
-                console.log(rjson)
-            });
-        //alert('Aguarde a página se atualizar');
         //window.location.reload();
     }
 
