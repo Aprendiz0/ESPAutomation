@@ -5,34 +5,37 @@ o_wifi = {
     end,
 
     setap = function()
+        local wifi_conf = vars.get("wifi_conf")
+
         wifi.ap.config({
-            ssid = v_wifi_ap_cfg_ssid,
-            pwd = v_wifi_ap_cfg_password,
-            max = v_wifi_ap_cfg_maxuser,
+            ssid = wifi_conf.ap_ssid,
+            pwd = wifi_conf.ap_pass,
+            max = wifi_conf.ap_maxu,
             auth = wifi.WPA_WPA2_PSK,
             save = false
         })
 
         wifi.ap.setip({ -- set IP,netmask, gateway
-            ip = v_wifi_ap_ip_ip,
-            netmask = v_wifi_ap_ip_netmask,
-            gateway = v_wifi_ap_ip_gateway
+            ip = wifi_conf.ap_ip,
+            netmask = wifi_conf.ap_netm,
+            gateway = wifi_conf.ap_getw
         })
 
-        print("Wifi openned")
+        print("Wifi openned: " .. wifi_conf.ap.ssid)
     end,
 
     setsta = function()
-        if v_wifi_sta_cfg_ssid then
+        local wifi_conf = vars.get("wifi_conf")
+
+        if wifi_conf.sta_ssid then
             wifi.sta.config({
-                ssid = v_wifi_sta_cfg_ssid,
-                pwd = v_wifi_sta_cfg_password,
+                ssid = wifi_conf.sta_ssid,
+                pwd = wifi_conf.sta_pass,
                 save = false,
                 auto = false
             })
-            print("connecting to: " .. v_wifi_sta_cfg_ssid)
+            print("connecting to: " .. wifi_conf.sta_ssid)
             print(wifi.sta.connect())
-            print("connected ", wifi.sta.getip())
         end
     end
 }

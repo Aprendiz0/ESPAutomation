@@ -1,99 +1,48 @@
-url_data = {
-    root = {url = "/", file = "events.html"},
-    not_found = {file = "not_found.html"},
-    wifi = {getap = {url = "/wifi/getap"}, set = {url = "/wifi/set"}},
-    files = {home = "home.html", wifi_config = "wifi_config.html"},
-    events = {set = "/events/set"}
-}
+require("http_server_source")
 
 srv = net.createServer(net.TCP)
 
 srv:listen(80, function(conn)
     conn:on("receive", function(sck, request)
-        local _, _, method, path, vars =
+
+        local _, _, method, path, query =
             string.find(request, "([A-Z]+) (.+)?(.+) HTTP");
+
         if (method == nil) then
             _, _, method, path = string.find(request, "([A-Z]+) (.+) HTTP");
         end
-        print("+H", method, path, vars, node.heap())
 
-        -- sck:send("<h1> Hello, NodeMCU.</h1>")
+        local body = string.match(request, "\r\n\r\n(.*)")
 
-        -- sendfile(sck, "index.html")
+        print("+H", method, path, query, node.heap())
 
-        if method == "GET" then
+        local source_data_method = source_data[method]
 
-            if path == url_data.root.url then
-                sendfile(sck, "text/html", url_data.root.file)
-            elseif path == url_data.wifi.getap.url then
-
-                wifi.sta.getap(function(t)
-
-                    sendHeader(sck, "application/json")
-                    sck:send('[')
-                    local isFirst = true
-
-                    for name, info in pairs(t) do
-                        if not isFirst then
-                            sck:send(',')
-                        else
-                            isFirst = false
-                        end
-                        sck:send(
-                            '{ "name": "' .. name .. '", "info": "' .. info ..
-                                '" }')
-                    end
-
-                    sck:send(']')
-                    finish(sck)
-
-                end)
-
-            elseif path == ("/" .. url_data.files.home) then
-                sendfile(sck, "text/html", url_data.files.home)
-            elseif path == ("/" .. url_data.files.wifi_config) then
-                sendfile(sck, "text/html", url_data.files.wifi_config)
-            else
-                sendfile(sck, "text/html", url_data.not_found.file)
-            end
-
-        elseif method == "POST" then
-
-            if path == url_data.wifi.set.url then
-                getEncodedJson(request)
-                sendHeader(sck, "application/json")
-                sck:send('{ "ok": "true" }')
-                finish(sck)
-            elseif path == url_data.events.set then
-                for i, line in ipairs(getEncodedJson(request)) do
-                    print(i)
-                    print(sjson.encode(line))
-                    print(line["id"])
-                    print(line.id)
+        if source_data_method then
+            local source = find_source(source_data_method, path)
+            if source then
+                if source.file then
+                    sendfile(sck, "text/html", source.file)
+                elseif source.func then
+                    source.func(sck, body)
                 end
-                sendHeader(sck, "application/json")
-                sck:send('{ "ok": "true" }')
-                finish(sck)
+            else
+                source = find_source(source_data_method, "/404")
+                if source.file then
+                    sendfile(sck, "text/html", source.file)
+                elseif source.func then
+                    source.func(sck, body)
+                end
             end
-
         end
+
     end)
 
 end)
 
-function sendfile(sck, contentType, fileName)
-    local function send(localSocket)
-        local str = file.readline()
-        if str then
-            localSocket:send(str)
-        else
-            finish(sck)
-        end
-    end
-
-    file.open(fileName)
-    sck:on("sent", send) -- triggers the send() function again once the first chunk of data was sent
-    send(sck)
+function sendHeader(sck, contentType)
+    sck:send("HTTP/1.1 200 OK\r\n" .. "Server: NodeMCU on ESP8266\r\n" ..
+                 "Content-Type: " .. contentType .. "; charset=UTF-8\r\n\r\n")
 end
 
 function finish(sck)
@@ -102,15 +51,30 @@ function finish(sck)
     print("+NS", node.heap())
 end
 
-function sendHeader(sck, contentType)
+function sendfile(sck, contentType, fileName)
+    local fd
 
-    sck:send("HTTP/1.1 200 OK\r\n" .. "Server: NodeMCU on ESP8266\r\n" ..
-                 "Content-Type: " .. contentType .. "; charset=UTF-8\r\n\r\n")
+    sendHeader(sck, contentType)
 
+    local function send(localSocket)
+        local str = fd.readline()
+        if str then
+            localSocket:send(str)
+        else
+            fd.close()
+            fd = nil
+            finish(sck)
+        end
+    end
+
+    fd = file.open(fileName)
+    sck:on("sent", send) -- triggers the send() function again once the first chunk of data was sent
+    send(sck)
 end
 
-function getEncodedJson(request)
-    local str = string.match(request, "\r\n\r\n(.*)")
-    print(str)
-    return sjson.decode(str)
+function find_source(source_data_method, path)
+    for k, value in pairs(source_data_method) do
+        if value.path ~= nil and value.path == path then return value end
+    end
+    return nil
 end

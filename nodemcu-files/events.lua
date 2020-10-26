@@ -1,3 +1,5 @@
+--[[
+
 -- to test
 gpio = {
     OUTPUT = 0,
@@ -17,6 +19,8 @@ gpio = {
     end
 }
 -- to test
+
+]]
 
 event = {}
 
