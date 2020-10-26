@@ -34,8 +34,13 @@ srv:listen(80, function(conn)
                     source.func(sck, body)
                 end
             end
+            source = nil
         end
-
+        source_data_method = nil
+        method = nil
+        path = nil
+        query = nil
+        body = nil
     end)
 
 end)
@@ -63,8 +68,9 @@ function sendfile(sck, contentType, fileName)
         else
             fd.close()
             fd = nil
-            finish(sck)
+            finish(localSocket)
         end
+        str = nil
     end
 
     fd = file.open(fileName)
