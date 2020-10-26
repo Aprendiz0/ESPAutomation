@@ -57,9 +57,7 @@ function finish(sck)
 end
 
 function sendfile(sck, contentType, fileName)
-    local fd
-
-    sendHeader(sck, contentType)
+    local fd = nil
 
     local function send(localSocket)
         local str = fd.readline()
@@ -75,7 +73,10 @@ function sendfile(sck, contentType, fileName)
 
     fd = file.open(fileName)
     sck:on("sent", send) -- triggers the send() function again once the first chunk of data was sent
+
+    sendHeader(sck, contentType)
     send(sck)
+
 end
 
 function find_source(source_data_method, path)

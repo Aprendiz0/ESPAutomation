@@ -22,6 +22,8 @@ o_wifi = {
         })
 
         print("Wifi openned: " .. wifi_conf.ap.ssid)
+
+        wifi_conf = nil
     end,
 
     setsta = function()
@@ -37,5 +39,7 @@ o_wifi = {
             print("connecting to: " .. wifi_conf.sta_ssid)
             print(wifi.sta.connect())
         end
+        
+        wifi_conf = nil
     end
 }

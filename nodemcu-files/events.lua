@@ -20,9 +20,7 @@ gpio = {
 }
 -- to test
 
-]]
-
-event = {}
+]] event = {}
 
 event.constants = {
     eventStartCondition = {if_and = 0, if_or = 1},
@@ -104,6 +102,7 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
             table.insert(eventR.lf_eventAction, eventActionFunction)
         end
 
+        eventActionFunction = nil
     end
 
     eventR.doAction = function()
@@ -138,17 +137,21 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
             table.insert(eventR.lf_eventStart, eventStartFunction)
         end
 
+        eventStartFunction = nil
+
     end
 
     eventR.checkStart = function()
 
-        for key, value in pairs(eventR.lf_eventStart) do
+        for k, value in pairs(eventR.lf_eventStart) do
             local v = value()
             if v and eventR.eventStartCondition ==
                 event.constants.eventStartCondition.if_or then
+                v = nil
                 return true
             elseif not v and eventR.eventStartCondition ==
                 event.constants.eventStartCondition.if_and then
+                v = nil
                 return false
             end
         end

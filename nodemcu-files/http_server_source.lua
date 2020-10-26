@@ -28,6 +28,8 @@ function source_wifi_get_ap(sck, body)
             sck:send('{ "name": "' .. name .. '", "info": "' .. info .. '" }')
         end
 
+        isFirst = nil
+        
         sck:send(']')
         finish(sck)
 
