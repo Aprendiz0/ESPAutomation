@@ -20,26 +20,26 @@ gpio = {
 }
 -- to test
 
-]] event = {}
+]] o_events = {}
 
-event.constants = {
+o_events.constants = {
     eventStartCondition = {if_and = 0, if_or = 1},
     eventStart = {alone = 0, gpioRead = 1},
     eventAction = {gpioWrite = 0, dispatch = 1}
 }
 
-event.events = {}
+o_events.events = {}
 
-event.getEvent = function(evName) return event.events[evName] end
+o_events.getEvent = function(evName) return o_events.events[evName] end
 
-event.removeEvent = function(evName) event.events[evName] = nil end
+o_events.removeEvent = function(evName) o_events.events[evName] = nil end
 
-event.dispatch = function(evName)
-    local eventDisp = event.getEvent(evName)
+o_events.dispatch = function(evName)
+    local eventDisp = o_events.getEvent(evName)
     if eventDisp then eventDisp.doAction() end
 end
 
-event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
+o_events.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
 
     local eventR = {
         id = id,
@@ -52,26 +52,26 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
     }
 
     if eventR.eventStartCondition == nil then
-        eventR.eventStartCondition = event.constants.eventStartCondition.if_and
+        eventR.eventStartCondition = o_events.constants.eventStartCondition.if_and
     end
 
-    -- // event standard function
+    -- // o_events standard function
     -- checkAndStart
-    -- // event standard function
+    -- // o_events standard function
 
-    -- // event functions
+    -- // o_events functions
     -- doAction
     -- checkStart
-    -- // event functions
+    -- // o_events functions
 
-    -- -- event standard function
+    -- -- o_events standard function
 
     eventR.checkAndStart = function()
         if eventR.checkStart() then eventR.doAction() end
     end
 
     ------------------------------------------------
-    -- -- event functions
+    -- -- o_events functions
     ------------------------------------------------
 
     ------------------------------------------------
@@ -81,18 +81,18 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
 
         local eventActionFunction = nil
 
-        if value.event == event.constants.eventAction.gpioWrite then
+        if value.o_events == o_events.constants.eventAction.gpioWrite then
 
             eventActionFunction = function()
                 gpio.mode(value.param.pin, gpio.OUTPUT)
                 gpio.write(value.param.pin, value.param.val)
             end
 
-        elseif value.event == event.constants.eventAction.dispatch then
+        elseif value.o_events == o_events.constants.eventAction.dispatch then
 
             if value.param.val ~= eventR.id then
                 eventActionFunction = function()
-                    event.dispatch(value.param.val)
+                    o_events.dispatch(value.param.val)
                 end
             end
 
@@ -116,11 +116,11 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
 
         local eventStartFunction = nil
 
-        if value.event == event.constants.eventStart.alone then
+        if value.o_events == o_events.constants.eventStart.alone then
 
             eventStartFunction = function() return true end
 
-        elseif value.event == event.constants.eventStart.gpioRead then
+        elseif value.o_events == o_events.constants.eventStart.gpioRead then
 
             eventStartFunction = function()
                 gpio.mode(value.param.pin, gpio.INPUT)
@@ -146,18 +146,18 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
         for k, value in pairs(eventR.lf_eventStart) do
             local v = value()
             if v and eventR.eventStartCondition ==
-                event.constants.eventStartCondition.if_or then
+                o_events.constants.eventStartCondition.if_or then
                 v = nil
                 return true
             elseif not v and eventR.eventStartCondition ==
-                event.constants.eventStartCondition.if_and then
+                o_events.constants.eventStartCondition.if_and then
                 v = nil
                 return false
             end
         end
 
         if eventR.eventStartCondition ==
-            event.constants.eventStartCondition.if_or then
+            o_events.constants.eventStartCondition.if_or then
             return false;
         else
             return true;
@@ -166,7 +166,7 @@ event.new = function(id, name, eventStartCondition, l_eventStart, l_eventAction)
     end
 
     -- // End
-    event.events[id] = eventR
+    o_events.events[id] = eventR
     return eventR
 
 end
@@ -174,11 +174,11 @@ end
 --[[
 -- teste do evento
 print("--- criando evento 1")
-local eventoTeste = event.new(1, "teste", nil, {
-    {event = event.constants.eventStart.alone, param = nil}
+local eventoTeste = o_events.new(1, "teste", nil, {
+    {o_events = o_events.constants.eventStart.alone, param = nil}
 }, {
     {
-        event = event.constants.eventAction.gpioWrite,
+        o_events = o_events.constants.eventAction.gpioWrite,
         param = {pin = 5, val = gpio.HIGH}
     }
 })
@@ -193,33 +193,33 @@ eventoTeste.checkAndStart()
 
 -- prints dispatch
 print("dispatch 1")
-event.dispatch(1)
+o_events.dispatch(1)
 
 -- teste do evento
 print("--- criando evento 2")
-local eventoTeste2 = event.new(2, "teste 2", nil, {
-    {event = event.constants.eventStart.alone, param = nil}
+local eventoTeste2 = o_events.new(2, "teste 2", nil, {
+    {o_events = o_events.constants.eventStart.alone, param = nil}
 }, {
     {
-        event = event.constants.eventAction.dispatch,
+        o_events = o_events.constants.eventAction.dispatch,
         param = {val = eventoTeste.id}
     }
 })
 
 -- prints dispatch
-print("dispatch by event 2, action 1")
+print("dispatch by o_events 2, action 1")
 eventoTeste2.doAction()
 
 -- teste do evento
 print("--- criando evento 3")
-local eventoTeste3 = event.new(3, "teste 3", nil, {
+local eventoTeste3 = o_events.new(3, "teste 3", nil, {
     {
-        event = event.constants.eventStart.gpioRead,
+        o_events = o_events.constants.eventStart.gpioRead,
         param = {pin = 3, val = gpio.LOW}
     }
 }, {
     {
-        event = event.constants.eventAction.gpioWrite,
+        o_events = o_events.constants.eventAction.gpioWrite,
         param = {pin = 1, val = gpio.HIGH}
     }
 })

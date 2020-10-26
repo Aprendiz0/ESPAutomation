@@ -1,8 +1,8 @@
-require("vars")
-require("events")
-require("routines")
+require("o_vars")
+require("o_events")
+require("o_routines")
 require("o_wifi")
-require("http_server")
+require("w_http_server")
 
 print(node.heap())
 

@@ -5,7 +5,7 @@ o_wifi = {
     end,
 
     setap = function()
-        local wifi_conf = vars.get("wifi_conf")
+        local wifi_conf = o_vars.get("wifi_conf")
 
         wifi.ap.config({
             ssid = wifi_conf.ap_ssid,
@@ -27,7 +27,7 @@ o_wifi = {
     end,
 
     setsta = function()
-        local wifi_conf = vars.get("wifi_conf")
+        local wifi_conf = o_vars.get("wifi_conf")
 
         if wifi_conf.sta_ssid then
             wifi.sta.config({

@@ -1,9 +1,9 @@
 source_data = {
     GET = {
-        [0] = {file = "events.html", path = "/"},
-        [1] = {file = "home.html", path = "/home"},
-        [2] = {file = "wifi_config.html", path = "/wifi_config"},
-        [3] = {file = "not_found.html", path = "/404"}
+        [0] = {file = "h_events.html", path = "/"},
+        [1] = {file = "h_home.html", path = "/home"},
+        [2] = {file = "h_wifi_config.html", path = "/wifi_config"},
+        [3] = {file = "h_not_found.html", path = "/404"}
     },
     POST = {
         [0] = {path = "/wifi/getap", func = source_wifi_get_ap},
