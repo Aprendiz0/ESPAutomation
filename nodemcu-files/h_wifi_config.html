@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPAutomation - Wifi configuration</title>
+
+    <style>
+        .arrow_right {
+            border: solid black;
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 3px;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg);
+            margin: 0 10px;
+        }
+
+        p.wifiload {
+            cursor: pointer;
+            color: black
+        }
+
+        #wifi_add {
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div style='padding: 10px;'>
+
+        <h1>Wifi configuration</h1>
+        <br />
+        <br />
+
+        <h3>Hotspots available</h3>
+        <div id="wifi_add"></div><br />
+        <input id="ssid" type='text' placeholder='SSID'><br /><br />
+        <input id="pass" type='password' placeholder='Password'><br /><br />
+        <input type='button' onclick='searchHotspots()' value='Refresh hotspots'>
+        <input type='button' onclick='connect()' value='Connect'>
+    </div>
+
+    <script>
+
+        function searchHotspots() {
+
+            let loadPointCounter = 0;
+            let loadInterval = setInterval(function () {
+                let p = "Finding hotspots ";
+
+                for (let i = 0; i < 3; i++) {
+                    if (i > loadPointCounter || (loadPointCounter - 2 > 0 && i < loadPointCounter - 2)) {
+                        p += " ";
+                    } else {
+                        p += ".";
+                    }
+                }
+
+                document.getElementById('wifi_add').innerHTML = p;
+
+                if (++loadPointCounter >= 6) {
+                    loadPointCounter = 0;
+                }
+
+            }, 250);
+
+            fetch('/wifi/getap', { method: 'POST' })
+                .then(function (x) {
+                    return x.json()
+                })
+                .then(function (r) {
+                    
+                    let wifi_list = ""
+
+                    for (const key in r) {
+                        let ssid = r[key].ssid,
+                            rssi = r[key].rssi
+                        wifi_list += '<p class="wifiload" onclick="(function(){ document.getElementById(\'ssid\').value = \''
+                            + ssid
+                            + '\' })()"><i class="arrow_right"></i>('
+                            + rssi
+                            + ') '
+                            + ssid
+                            + '</p>'
+                    }
+
+                    clearInterval(loadInterval);
+                    document.getElementById('wifi_add').innerHTML = wifi_list
+
+                }).catch(function () {
+                    setTimeout(function () {
+                        clearInterval(loadInterval);
+                        alert('Error on request')
+                    }, 100)
+                })
+        }
+
+        function connect() {
+
+            let cred = {
+                ssid: document.getElementById('ssid').value,
+                pass: document.getElementById('pass').value,
+            }
+
+            fetch('/wifi/set', {
+                method: "POST",
+                body: JSON.stringify(cred)
+            })
+                .then(function (x) {
+                    return x.json()
+                })
+                .then(function (r) {
+
+                    alert("Success!")
+
+                }).catch(function () {
+                    setTimeout(function () {
+                        alert('Error on request')
+                    }, 100)
+                })
+        }
+
+        searchHotspots();
+    </script>
+</body>
+
+</html>

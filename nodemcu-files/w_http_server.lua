@@ -51,7 +51,8 @@ function sendHeader(sck, contentType)
 end
 
 function finish(sck)
-    sck:close()
+    sck:on("sent", function(lsck) lsck:close() end)
+    sck:send("\n")
     collectgarbage("collect")
     print("+NS", node.heap())
 end
@@ -59,14 +60,14 @@ end
 function sendfile(sck, contentType, fileName)
     local fd = nil
 
-    local function send(localSocket)
+    local function send(lsck)
         local str = fd.readline()
         if str then
-            localSocket:send(str)
+            lsck:send(str)
         else
             fd.close()
             fd = nil
-            finish(localSocket)
+            finish(lsck)
         end
         str = nil
     end
