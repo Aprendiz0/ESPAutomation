@@ -8,17 +8,17 @@ source_data = {
     POST = {
         [0] = {
             path = "/wifi/getap",
-            func = o_general.file_function("wf_source_wifi_get_ap.func.lua",
+            func = o_general.file_function("wf_source_wifi_get_ap.lua",
                                            "source_wifi_get_ap")
         },
         [1] = {
             path = "/wifi/set",
-            func = o_general.file_function("wf_source_wifi_set.func.lua",
+            func = o_general.file_function("wf_source_wifi_set.lua",
                                            "source_wifi_set")
         },
         [2] = {
             path = "/events/set",
-            func = o_general.file_function("wf_source_events_set.func.lua",
+            func = o_general.file_function("wf_source_events_set.lua",
                                            "source_events_set")
         }
     }

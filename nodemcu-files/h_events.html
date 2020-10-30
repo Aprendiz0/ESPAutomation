@@ -175,7 +175,7 @@
         <tr id="startLine_&1_&2">
             <td>
                 <select id="startType_&1_&2" required>
-                    <option selected>Select one</option>
+                    <option value="" selected>Select one</option>
                     <option value="0">alone</option>
                     <option value="1">gpioRead</option>
                 </select>
@@ -192,7 +192,7 @@
         <tr id="actionLine_&1_&2">
             <td>
                 <select id="actionType_&1_&2" required>
-                    <option selected>Select one</option>
+                    <option value="" selected>Select one</option>
                     <option value="0">gpioWrite</option>
                     <option value="1">Dispacth event</option>
                 </select>
@@ -296,7 +296,7 @@
 
     function removeStart(evId, stId) {
         getEId('startLine_' + evId + '_' + stId).remove();
-        delete eventsRegistred[evId].actions[stId];
+        delete eventsRegistred[evId].starts[stId];
     }
 
     function removeAction(evId, stId) {
@@ -337,20 +337,8 @@
                 event.starts.push({
                     //id: startKey,
                     type: startType,
-                    param: getStartParam()
+                    param: getParam('startParamTd_', (eId + '_' + startKey))
                 })
-
-                function getStartParam() {
-                    let r = {}
-                    let ips = getEId('startParamTd_', (eId + '_' + startKey), '.is-value');
-
-                    for (let k = 0; k < ips.length; k++) {
-                        const ip = ips[k];
-                        r[ip.name] = ip.value;
-                    }
-
-                    return r
-                }
             }
 
             for (const aKey in eventKey.actions) {
@@ -362,20 +350,20 @@
                 event.actions.push({
                     //id: actionKey,
                     type: actionType,
-                    param: getEId('actionParam_', (eId + '_' + actionKey)).value
+                    param: getParam('actionParamTd_', (eId + '_' + actionKey))
                 })
+            }
 
-                function getActionParam() {
-                    let r = {}
-                    let ips = getEId('startParamTd_', (eId + '_' + startKey), '.is-value');
+            function getParam(id, comp) {
+                let r = {}
+                let ips = getEId(id, comp, '.is-value');
 
-                    for (let k = 0; k < ips.length; k++) {
-                        const ip = ips[k];
-                        r[ip.name] = ip.value;
-                    }
-
-                    return r
+                for (let k = 0; k < ips.length; k++) {
+                    const ip = ips[k];
+                    r[ip.name] = ip.value;
                 }
+
+                return r
             }
 
             eventsReg.push(event);

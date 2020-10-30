@@ -16,9 +16,6 @@ require("o_routines")
 print("o_wifi: " .. node.heap())
 require("o_wifi")
 
-print("w_http_server_source: " .. node.heap())
-require("w_http_server_source")
-
 print("w_http_server: " .. node.heap())
 require("w_http_server")
 

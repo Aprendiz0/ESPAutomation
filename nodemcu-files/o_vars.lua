@@ -24,5 +24,5 @@ o_vars = {
 }
 
 -- first load
-o_general.execute_file_function("o_vars_f_first_load.func.lua", "o_vars_first_load")
+o_general.execute_file_function("of_vars_first_load.lua", "o_vars_first_load")
 -- first load

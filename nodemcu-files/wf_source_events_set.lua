@@ -5,6 +5,7 @@ function source_events_set(sck, body)
         print(sjson.encode(line))
         print(line["id"])
         print(line.id)
+        print(line.name)
     end
     sendHeader(sck, "application/json")
     sck:send('{ "ok": "true" }')
