@@ -39,7 +39,7 @@ o_events.dispatch = function(evId)
     if eventDisp then eventDisp.doAction() end
 end
 
-o_events.new = o_general.file_function("o_events_f_new.func.lua",
+o_events.new = o_general.file_function("of_events_f_new.func.lua",
                                        "create_new_o_event")
 
 --[[
