@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESPAutomation - Events</title>
     <style>
-        table {
+        .tbo {
             border-collapse: collapse;
         }
 
-        table,
-        th,
-        td {
+        .tbo,
+        .tbo th,
+        .tbo td {
             border: 1px solid black;
         }
 
@@ -49,7 +49,35 @@
 <body>
     <div style="padding: 10px;">
         <h1>Events</h1>
+        <!-- Nav Start -->
+
         <br />
+        <br />
+
+        <style>
+            .pad {
+                padding: 0 10px 0 0;
+            }
+        </style>
+
+        <table>
+            <tr>
+                <td class="pad">
+                    <a href="/"> Home </a>
+                </td>
+                <td class="pad">
+                    <a href="/events"> Events </a>
+                </td>
+                <td class="pad">
+                    <a href="/wifi_config"> Wifi Configuration </a>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+        <br />
+
+        <!-- Nav End -->
 
         <form onsubmit="event.preventDefault(); save()">
             <p>
@@ -61,7 +89,7 @@
 
             <br />
             <br />
-            <table>
+            <table class="tbo">
                 <thead>
                     <tr>
                         <td>Event Id</td>
@@ -109,7 +137,7 @@
                 <button onclick="addStart('&1')">Add</button>
                 <br />
                 <br />
-                <table>
+                <table class="tbo">
                     <thead>
                         <tr>
                             <td>Type</td>
@@ -126,7 +154,7 @@
                 <button onclick="addAction('&1')">Add</button>
                 <br />
                 <br />
-                <table>
+                <table class="tbo">
                     <thead>
                         <tr>
                             <td>Type</td>

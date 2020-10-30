@@ -1,4 +1,28 @@
-require("w_http_server_source")
+source_data = {
+    GET = {
+        [0] = {file = "h_home.html", path = "/"},
+        [1] = {file = "h_events.html", path = "/events"},
+        [2] = {file = "h_wifi_config.html", path = "/wifi_config"},
+        [3] = {file = "h_not_found.html", path = "/404"}
+    },
+    POST = {
+        [0] = {
+            path = "/wifi/getap",
+            func = o_general.file_function("wf_source_wifi_get_ap.func.lua",
+                                           "source_wifi_get_ap")
+        },
+        [1] = {
+            path = "/wifi/set",
+            func = o_general.file_function("wf_source_wifi_set.func.lua",
+                                           "source_wifi_set")
+        },
+        [2] = {
+            path = "/events/set",
+            func = o_general.file_function("wf_source_events_set.func.lua",
+                                           "source_events_set")
+        }
+    }
+}
 
 srv = net.createServer(net.TCP)
 
@@ -14,7 +38,7 @@ srv:listen(80, function(conn)
 
         local body = string.match(request, "\r\n\r\n(.*)")
 
-        print("+H", method, path, query, node.heap())
+        o_log.print_log("+H", method, path, query, node.heap())
 
         local source_data_method = source_data[method]
 
@@ -54,7 +78,7 @@ function finish(sck)
     sck:on("sent", function(lsck) lsck:close() end)
     sck:send("\n")
     collectgarbage("collect")
-    print("+NS", node.heap())
+    o_log.print_log("+NS", node.heap())
 end
 
 function sendfile(sck, contentType, fileName)

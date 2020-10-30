@@ -19,7 +19,8 @@
 
         p.wifiload {
             cursor: pointer;
-            color: black
+            color: black;
+            width: fit-content;
         }
 
         #wifi_add {
@@ -32,8 +33,35 @@
     <div style='padding: 10px;'>
 
         <h1>Wifi configuration</h1>
+        <!-- Nav Start -->
+
         <br />
         <br />
+
+        <style>
+            .pad {
+                padding: 0 10px 0 0;
+            }
+        </style>
+
+        <table>
+            <tr>
+                <td class="pad">
+                    <a href="/"> Home </a>
+                </td>
+                <td class="pad">
+                    <a href="/events"> Events </a>
+                </td>
+                <td class="pad">
+                    <a href="/wifi_config"> Wifi Configuration </a>
+                </td>
+            </tr>
+        </table>
+
+        <br />
+        <br />
+        
+        <!-- Nav End -->
 
         <h3>Hotspots available</h3>
         <div id="wifi_add"></div><br />
