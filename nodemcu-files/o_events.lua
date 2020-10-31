@@ -1,26 +1,4 @@
---[[
-
--- to test
-gpio = {
-    OUTPUT = 0,
-    INPUT = 1,
-    LOW = 0,
-    HIGH = 1,
-    mode = function(pin, val)
-        o_log.print_log("GPIO MODE: pin " .. pin .. " / mode: " .. val)
-    end,
-    write = function(pin, val)
-        o_log.print_log("GPIO WRITE: pin " .. pin .. " / val: " .. val)
-    end,
-    read = function(pin)
-        local val = gpio.LOW
-        o_log.print_log("GPIO READ: pin " .. pin .. " / val: " .. val)
-        return val
-    end
-}
--- to test
-
-]] o_events = {temp = {}}
+o_events = {temp = {}}
 
 o_events.constants = {
     eventStartCondition = {if_and = 0, if_or = 1},
@@ -29,6 +7,19 @@ o_events.constants = {
 }
 
 o_events.events = {}
+
+o_events.removeAllEvents = function()
+    o_events.events = {}
+    o_vars.save("saved_events", {})
+end
+
+o_events.getEventsFromVars = function()
+    local saved_events = o_vars.get("saved_events")
+    for e, event in ipairs(saved_events) do
+        o_events.new(event.id, event.name, event.startCondition, event.starts,
+                     event.actions)
+    end
+end
 
 o_events.getEvent = function(evId) return o_events.events[evId] end
 
@@ -39,17 +30,17 @@ o_events.dispatch = function(evId)
     if eventDisp then eventDisp.doAction() end
 end
 
-o_events.new = o_general.file_function("of_events_f_new.lua",
-                                       "create_new_o_event")
+o_events.new =
+    o_general.file_function("of_events_new.lua", "create_new_o_event")
 
 --[[
 -- teste do evento
 o_log.print_log("--- criando evento 1")
 local eventoTeste = o_events.new(1, "teste", nil, {
-    {o_events = o_events.constants.eventStart.alone, param = nil}
+    {type = o_events.constants.eventStart.alone, param = nil}
 }, {
     {
-        o_events = o_events.constants.eventAction.gpioWrite,
+        type = o_events.constants.eventAction.gpioWrite,
         param = {pin = 5, val = gpio.HIGH}
     }
 })
@@ -69,10 +60,10 @@ o_events.dispatch(1)
 -- teste do evento
 o_log.print_log("--- criando evento 2")
 local eventoTeste2 = o_events.new(2, "teste 2", nil, {
-    {o_events = o_events.constants.eventStart.alone, param = nil}
+    {type = o_events.constants.eventStart.alone, param = nil}
 }, {
     {
-        o_events = o_events.constants.eventAction.dispatch,
+        type = o_events.constants.eventAction.dispatch,
         param = {val = eventoTeste.id}
     }
 })
@@ -85,12 +76,12 @@ eventoTeste2.doAction()
 o_log.print_log("--- criando evento 3")
 local eventoTeste3 = o_events.new(3, "teste 3", nil, {
     {
-        o_events = o_events.constants.eventStart.gpioRead,
+        type = o_events.constants.eventStart.gpioRead,
         param = {pin = 3, val = gpio.LOW}
     }
 }, {
     {
-        o_events = o_events.constants.eventAction.gpioWrite,
+        type = o_events.constants.eventAction.gpioWrite,
         param = {pin = 1, val = gpio.HIGH}
     }
 })

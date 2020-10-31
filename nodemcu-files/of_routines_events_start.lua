@@ -1,10 +1,11 @@
-function o_eventRoutines_events_start()
+function o_routines_events_start()
 
     local timer = tmr.create()
 
     local eventsFunction = function()
         for key, value in pairs(o_events.events) do
             value:checkAndStart()
+            print("check and start event: " .. value.name)
         end
     end
 
@@ -12,6 +13,6 @@ function o_eventRoutines_events_start()
     timer:interval(1000)
     timer:start()
 
-    o_eventRoutines.routines["events"] = timer;
+    o_routines.routines["events"] = timer;
 
 end

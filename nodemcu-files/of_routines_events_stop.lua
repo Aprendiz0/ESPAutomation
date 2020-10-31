@@ -1,12 +1,12 @@
-function o_eventRoutines_events_start()
+function o_routines_events_stop()
 
-    local timer = o_eventRoutines.routines["events"];
+    local timer = o_routines.routines["events"];
 
     if timer then
         timer:stop()
         timer:unregister()
     end
 
-    o_eventRoutines.routines["events"] = nil;
+    o_routines.routines["events"] = nil;
 
 end

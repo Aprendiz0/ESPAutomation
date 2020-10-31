@@ -1,12 +1,13 @@
 function source_events_set(sck, body)
     print(body)
-    for i, line in ipairs(sjson.decode(body)) do
-        print(i)
-        print(sjson.encode(line))
-        print(line["id"])
-        print(line.id)
-        print(line.name)
-    end
+
+    o_events.removeAllEvents()
+
+    local l_events = sjson.decode(body)
+    o_vars.save("saved_events", l_events)
+
+    o_events.getEventsFromVars()
+
     sendHeader(sck, "application/json")
     sck:send('{ "ok": "true" }')
     finish(sck)

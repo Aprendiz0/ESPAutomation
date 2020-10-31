@@ -1,5 +1,6 @@
 -- first load
 function o_vars_first_load()
+
     if not file.exists(o_vars.build_name("wifi_conf")) then
         local table = {}
         table.ap_ssid = "teste"
@@ -12,7 +13,15 @@ function o_vars_first_load()
         table.sta_pass = "10877520"
         o_vars.save("wifi_conf", table)
         table = nil
-        o_log.print_log("first o_vars ok")
     end
+
+    if not file.exists(o_vars.build_name("saved_events")) then
+        local table = {}
+        o_vars.save("saved_events", table)
+        table = nil
+    end
+    
+    o_log.print_log("first o_vars ok")
+    
 end
 -- first load

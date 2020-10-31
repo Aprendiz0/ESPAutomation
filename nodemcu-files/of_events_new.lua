@@ -42,14 +42,14 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
 
         local eventActionFunction = nil
 
-        if value.o_events == o_events.constants.eventAction.gpioWrite then
+        if value.type == o_events.constants.eventAction.gpioWrite then
 
             eventActionFunction = function()
                 gpio.mode(value.param.pin, gpio.OUTPUT)
                 gpio.write(value.param.pin, value.param.val)
             end
 
-        elseif value.o_events == o_events.constants.eventAction.dispatch then
+        elseif value.type == o_events.constants.eventAction.dispatch then
 
             if value.param.val ~= eventR.id then
                 eventActionFunction = function()
@@ -77,11 +77,11 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
 
         local eventStartFunction = nil
 
-        if value.o_events == o_events.constants.eventStart.alone then
+        if value.type == o_events.constants.eventStart.alone then
 
             eventStartFunction = function() return true end
 
-        elseif value.o_events == o_events.constants.eventStart.gpioRead then
+        elseif value.type == o_events.constants.eventStart.gpioRead then
 
             eventStartFunction = function()
                 gpio.mode(value.param.pin, gpio.INPUT)
