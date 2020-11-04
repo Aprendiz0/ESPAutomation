@@ -20,6 +20,11 @@ source_data = {
             path = "/events/set",
             func = o_general.file_function("wf_source_events_set.lua",
                                            "source_events_set")
+        },
+        [3] = {
+            path = "/events/get",
+            func = o_general.file_function("wf_source_get_saved_events.lua",
+                                           "source_get_saved_events")
         }
     }
 }

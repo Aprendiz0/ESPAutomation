@@ -85,10 +85,14 @@
                 <br />
                 <br />
                 <button type="submit">Save</button>
+                <br />
+                <br />
+                <button onclick="getEvents()">Get events from memory</button>
             </p>
 
             <br />
             <br />
+            <div id="events_load"></div>
             <table class="tbo">
                 <thead>
                     <tr>
@@ -399,6 +403,50 @@
             })
         //window.location.reload();
     }
+
+    function getEvents() {
+
+        let loadPointCounter = 0;
+        let loadInterval = setInterval(function () {
+            let p = "Getting events ";
+
+            for (let i = 0; i < 3; i++) {
+                if (i > loadPointCounter || (loadPointCounter - 2 > 0 && i < loadPointCounter - 2)) {
+                    p += " ";
+                } else {
+                    p += ".";
+                }
+            }
+
+            p += "<br /><br />"
+
+            document.getElementById('events_load').innerHTML = p;
+
+            if (++loadPointCounter >= 6) {
+                loadPointCounter = 0;
+            }
+
+        }, 250);
+
+        fetch('/events/get', { method: 'POST' })
+            .then(function (x) {
+                return x.json()
+            })
+            .then(function (r) {
+                console.log(r)
+
+                clearInterval(loadInterval);
+                document.getElementById('events_load').innerHTML = ""
+
+            }).catch(function () {
+                setTimeout(function () {
+                    clearInterval(loadInterval);
+                    alert('Error on request')
+                }, 100)
+            })
+    }
+
+    getEvents()
 
 </script>
 

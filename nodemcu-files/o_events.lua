@@ -11,6 +11,7 @@ o_events.events = {}
 o_events.removeAllEvents = function()
     o_events.events = {}
     o_vars.save("saved_events", {})
+    o_log.print_log("removed all events")
 end
 
 o_events.getEventsFromVars = function()
@@ -19,14 +20,15 @@ o_events.getEventsFromVars = function()
         o_events.new(event.id, event.name, event.startCondition, event.starts,
                      event.actions)
     end
+    o_log.print_log("events loaded from vars")
 end
 
 o_events.getEvent = function(evId) return o_events.events[evId] end
 
 o_events.removeEvent = function(evId) o_events.events[evId] = nil end
 
-o_events.dispatch = function(evId)
-    local eventDisp = o_events.getEvent(evId)
+o_events.dispatch = function(disp_evId)
+    local eventDisp = o_events.getEvent(disp_evId)
     if eventDisp then eventDisp.doAction() end
 end
 
@@ -35,7 +37,7 @@ o_events.new =
 
 --[[
 -- teste do evento
-o_log.print_log("--- criando evento 1")
+print("--- criando evento 1")
 local eventoTeste = o_events.new(1, "teste", nil, {
     {type = o_events.constants.eventStart.alone, param = nil}
 }, {
@@ -47,18 +49,18 @@ local eventoTeste = o_events.new(1, "teste", nil, {
 
 --
 -- prints
-o_log.print_log(eventoTeste.name)
+print(eventoTeste.name)
 eventoTeste.doAction()
 
-o_log.print_log("checkAndStart")
+print("checkAndStart")
 eventoTeste.checkAndStart()
 
 -- prints dispatch
-o_log.print_log("dispatch 1")
+print("dispatch 1")
 o_events.dispatch(1)
 
 -- teste do evento
-o_log.print_log("--- criando evento 2")
+print("--- criando evento 2")
 local eventoTeste2 = o_events.new(2, "teste 2", nil, {
     {type = o_events.constants.eventStart.alone, param = nil}
 }, {
@@ -69,11 +71,11 @@ local eventoTeste2 = o_events.new(2, "teste 2", nil, {
 })
 
 -- prints dispatch
-o_log.print_log("dispatch by o_events 2, action 1")
+print("dispatch by o_events 2, action 1")
 eventoTeste2.doAction()
 
 -- teste do evento
-o_log.print_log("--- criando evento 3")
+print("--- criando evento 3")
 local eventoTeste3 = o_events.new(3, "teste 3", nil, {
     {
         type = o_events.constants.eventStart.gpioRead,
@@ -87,6 +89,6 @@ local eventoTeste3 = o_events.new(3, "teste 3", nil, {
 })
 
 -- prints dispatch
-o_log.print_log("dispatch by action 3")
+print("dispatch by action 3")
 eventoTeste3.checkAndStart()
 ]]

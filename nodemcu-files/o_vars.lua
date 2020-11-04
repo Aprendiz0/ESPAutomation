@@ -11,9 +11,16 @@ o_vars = {
         return ok
     end,
 
-    get = function(name)
+    getJSON = function (name)
         if file.exists(o_vars.build_name(name)) then
-            local content = file.getcontents(o_vars.build_name(name))
+            return file.getcontents(o_vars.build_name(name))
+        end
+        return nil
+    end,
+
+    get = function(name)
+        local content = o_vars.getJSON(name)
+        if content then
             o_log.print_log(
                 "read content of file '" .. o_vars.build_name(name) .. "': " ..
                     content)

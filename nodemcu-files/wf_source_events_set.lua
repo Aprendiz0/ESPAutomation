@@ -1,5 +1,4 @@
 function source_events_set(sck, body)
-    print(body)
 
     o_events.removeAllEvents()
 
@@ -11,4 +10,5 @@ function source_events_set(sck, body)
     sendHeader(sck, "application/json")
     sck:send('{ "ok": "true" }')
     finish(sck)
+
 end

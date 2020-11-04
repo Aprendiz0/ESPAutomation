@@ -5,7 +5,6 @@ function o_routines_events_start()
     local eventsFunction = function()
         for key, value in pairs(o_events.events) do
             value:checkAndStart()
-            print("check and start event: " .. value.name)
         end
     end
 

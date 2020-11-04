@@ -8,7 +8,8 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         l_eventStart = l_eventStart,
         l_eventAction = l_eventAction,
         lf_eventStart = {},
-        lf_eventAction = {}
+        lf_eventAction = {},
+        state = {}
     }
 
     if eventR.eventStartCondition == nil then
@@ -45,8 +46,16 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         if value.type == o_events.constants.eventAction.gpioWrite then
 
             eventActionFunction = function()
-                gpio.mode(value.param.pin, gpio.OUTPUT)
-                gpio.write(value.param.pin, value.param.val)
+                gpio.mode(value.param.pin, gpio.INPUT)
+                local r = gpio.read(value.param.pin)
+                if r ~= value.param.state then
+                    value.param.state = r
+                    gpio.mode(value.param.pin, gpio.OUTPUT)
+                    gpio.write(value.param.pin, value.param.val)
+                    o_log.print_log("event[" .. eventR.id ..
+                                        "] writing on gpio pin: " ..
+                                        value.param.pin)
+                end
             end
 
         elseif value.type == o_events.constants.eventAction.dispatch then
@@ -54,6 +63,9 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
             if value.param.val ~= eventR.id then
                 eventActionFunction = function()
                     o_events.dispatch(value.param.val)
+                    o_log.print_log("event[" .. eventR.id ..
+                                        "] dispathing event with id: " ..
+                                        value.param.val)
                 end
             end
 
@@ -79,17 +91,32 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
 
         if value.type == o_events.constants.eventStart.alone then
 
-            eventStartFunction = function() return true end
+            eventStartFunction = function()
+                o_log.print_log("event[" .. eventR.id ..
+                                    "] check: event starting alone")
+                return true
+            end
 
         elseif value.type == o_events.constants.eventStart.gpioRead then
 
             eventStartFunction = function()
+
                 gpio.mode(value.param.pin, gpio.INPUT)
-                if gpio.read(value.param.pin) == value.param.val then
-                    return true
+                local r = gpio.read(value.param.pin)
+                if r ~= value.param.state then
+                    value.param.state = r
+                    o_log.print_log("event[" .. eventR.id ..
+                                        "] check: reading on gpio pin: " ..
+                                        value.param.val)
+                    if gpio.read(value.param.pin) == value.param.val then
+                        return true
+                    else
+                        return false
+                    end
                 else
                     return false
                 end
+
             end
 
         end
