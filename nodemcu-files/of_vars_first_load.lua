@@ -9,8 +9,8 @@ function o_vars_first_load()
         table.ap_ip = "192.168.4.1"
         table.ap_netm = "255.255.255.0"
         table.ap_gatw = "192.168.4.1"
-        table.sta_ssid = "Claro Virtua 172 2.4g"
-        table.sta_pass = "10877520"
+        table.sta_ssid = "Casa network 100Mb"
+        table.sta_pass = "1357924680"
         o_vars.save("wifi_conf", table)
         table = nil
     end

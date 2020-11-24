@@ -24,3 +24,5 @@ print("all: " .. node.heap())
 -- o_wifi.register_events()
 wifi.setmode(wifi.STATIONAP)
 o_wifi.setsta()
+
+o_routines.events.start()

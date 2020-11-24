@@ -1,6 +1,7 @@
 function create_new_o_event(id, name, eventStartCondition, l_eventStart,
                             l_eventAction)
 
+    print("e: " .. node.heap())
     local eventR = {
         id = id,
         name = name,
@@ -16,6 +17,7 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         eventR.eventStartCondition = o_events.constants.eventStartCondition
                                          .if_and
     end
+    print("f: " .. node.heap())
 
     -- // o_events standard function
     -- checkAndStart
@@ -39,6 +41,7 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
     ------------------------------------------------
     -- define doAction
     ------------------------------------------------
+    print("a: " .. node.heap())
     for key, value in pairs(eventR.l_eventAction) do
 
         local eventActionFunction = nil
@@ -46,26 +49,20 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         if value.type == o_events.constants.eventAction.gpioWrite then
 
             eventActionFunction = function()
-                gpio.mode(value.param.pin, gpio.INPUT)
-                local r = gpio.read(value.param.pin)
-                if r ~= value.param.state then
-                    value.param.state = r
-                    gpio.mode(value.param.pin, gpio.OUTPUT)
-                    gpio.write(value.param.pin, value.param.val)
-                    o_log.print_log("event[" .. eventR.id ..
-                                        "] writing on gpio pin: " ..
-                                        value.param.pin)
-                end
+                o_general.file_function("of_events_new_action_gpw.lua",
+                                        "events_new_action_gpw")(eventR.id,
+                                                                 value.param.pin,
+                                                                 value.param.val)
             end
 
         elseif value.type == o_events.constants.eventAction.dispatch then
 
             if value.param.val ~= eventR.id then
                 eventActionFunction = function()
-                    o_events.dispatch(value.param.val)
-                    o_log.print_log("event[" .. eventR.id ..
-                                        "] dispathing event with id: " ..
-                                        value.param.val)
+                    o_general.file_function("of_events_new_action_disp.lua",
+                                            "events_new_action_disp")(eventR.id,
+                                                                      value.param
+                                                                          .val)
                 end
             end
 
@@ -78,6 +75,7 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         eventActionFunction = nil
     end
 
+    print("b: " .. node.heap())
     eventR.doAction = function()
         for key, value in pairs(eventR.lf_eventAction) do value() end
     end
@@ -85,6 +83,7 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
     ------------------------------------------------
     -- define checkStart
     ------------------------------------------------
+    print("c: " .. node.heap())
     for key, value in pairs(eventR.l_eventStart) do
 
         local eventStartFunction = nil
@@ -100,23 +99,10 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         elseif value.type == o_events.constants.eventStart.gpioRead then
 
             eventStartFunction = function()
-
-                gpio.mode(value.param.pin, gpio.INPUT)
-                local r = gpio.read(value.param.pin)
-                if r ~= value.param.state then
-                    value.param.state = r
-                    o_log.print_log("event[" .. eventR.id ..
-                                        "] check: reading on gpio pin: " ..
-                                        value.param.val)
-                    if gpio.read(value.param.pin) == value.param.val then
-                        return true
-                    else
-                        return false
-                    end
-                else
-                    return false
-                end
-
+                o_general.file_function("of_events_new_start_gpr.lua",
+                                        "events_new_start_gpr")(eventR.id,
+                                                                value.param.pin,
+                                                                value.param.val)
             end
 
         end
@@ -128,29 +114,12 @@ function create_new_o_event(id, name, eventStartCondition, l_eventStart,
         eventStartFunction = nil
 
     end
+    print("d: " .. node.hedp())
 
     eventR.checkStart = function()
-
-        for k, value in pairs(eventR.lf_eventStart) do
-            local v = value()
-            if v and eventR.eventStartCondition ==
-                o_events.constants.eventStartCondition.if_or then
-                v = nil
-                return true
-            elseif not v and eventR.eventStartCondition ==
-                o_events.constants.eventStartCondition.if_and then
-                v = nil
-                return false
-            end
-        end
-
-        if eventR.eventStartCondition ==
-            o_events.constants.eventStartCondition.if_or then
-            return false;
-        else
-            return true;
-        end
-
+        o_general.file_function("of_events_new_check_start.lua",
+                                "events_new_check_start")(eventR.lf_eventStart,
+                                                          eventR.eventStartCondition)
     end
 
     -- // End

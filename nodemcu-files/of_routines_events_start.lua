@@ -5,6 +5,7 @@ function o_routines_events_start()
     local eventsFunction = function()
         for key, value in pairs(o_events.events) do
             value:checkAndStart()
+            o_log.print_log("checking event with id [" .. value.id .. "] to start +HP " .. node.heap())
         end
     end
 

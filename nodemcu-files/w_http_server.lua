@@ -3,7 +3,8 @@ source_data = {
         [0] = {file = "h_home.html", path = "/"},
         [1] = {file = "h_events.html", path = "/events"},
         [2] = {file = "h_wifi_config.html", path = "/wifi_config"},
-        [3] = {file = "h_not_found.html", path = "/404"}
+        [3] = {file = "h_log.html", path = "/log"},
+        [4] = {file = "h_not_found.html", path = "/404"}
     },
     POST = {
         [0] = {
@@ -25,6 +26,11 @@ source_data = {
             path = "/events/get",
             func = o_general.file_function("wf_source_get_saved_events.lua",
                                            "source_get_saved_events")
+        },
+        [4] = {
+            path = "/log/get",
+            func = o_general.file_function("wf_source_get_log.lua",
+                                           "source_get_log")
         }
     }
 }
@@ -87,12 +93,13 @@ function finish(sck)
 end
 
 function sendfile(sck, contentType, fileName)
+    
     local fd = nil
 
     local function send(lsck)
         local str = fd.readline()
         if str then
-            lsck:send(str)
+            lsck:send(string.sub(str,1,-2) .. "\n")
         else
             fd.close()
             fd = nil
@@ -101,7 +108,7 @@ function sendfile(sck, contentType, fileName)
         str = nil
     end
 
-    fd = file.open(fileName)
+    fd = file.open(fileName, "r")
     sck:on("sent", send) -- triggers the send() function again once the first chunk of data was sent
 
     sendHeader(sck, contentType)

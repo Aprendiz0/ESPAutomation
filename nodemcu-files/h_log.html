@@ -32,7 +32,7 @@
 <body>
     <div style='padding: 10px;'>
 
-        <h1>Wifi configuration</h1>
+        <h1>Log</h1>
         <!-- Nav Start -->
 
         <br />
@@ -63,24 +63,20 @@
 
         <br />
         <br />
-        
+
         <!-- Nav End -->
 
-        <h3>Hotspots available</h3>
-        <div id="wifi_add"></div><br />
-        <input id="ssid" type='text' placeholder='SSID'><br /><br />
-        <input id="pass" type='password' placeholder='Password'><br /><br />
-        <input type='button' onclick='searchHotspots()' value='Refresh hotspots'>
-        <input type='button' onclick='connect()' value='Connect'>
+        <h3>----</h3>
+        <div id="log_load"></div><br />
     </div>
 
     <script>
 
-        function searchHotspots() {
+        function getLog() {
 
             let loadPointCounter = 0;
             let loadInterval = setInterval(function () {
-                let p = "Finding hotspots ";
+                let p = "Getting log ";
 
                 for (let i = 0; i < 3; i++) {
                     if (i > loadPointCounter || (loadPointCounter - 2 > 0 && i < loadPointCounter - 2)) {
@@ -90,7 +86,7 @@
                     }
                 }
 
-                document.getElementById('wifi_add').innerHTML = p;
+                document.getElementById('log_load').innerHTML = p;
 
                 if (++loadPointCounter >= 6) {
                     loadPointCounter = 0;
@@ -98,28 +94,14 @@
 
             }, 250);
 
-            fetch('/wifi/getap', { method: 'POST' })
+            fetch('/log/get', { method: 'POST' })
                 .then(function (x) {
-                    return x.json()
+                    return x.text()
                 })
                 .then(function (r) {
-                    
-                    let wifi_list = ""
-
-                    for (const key in r) {
-                        let ssid = r[key].ssid,
-                            rssi = r[key].rssi
-                        wifi_list += '<p class="wifiload" onclick="(function(){ document.getElementById(\'ssid\').value = \''
-                            + ssid
-                            + '\' })()"><i class="arrow_right"></i>('
-                            + rssi
-                            + ') '
-                            + ssid
-                            + '</p>'
-                    }
 
                     clearInterval(loadInterval);
-                    document.getElementById('wifi_add').innerHTML = wifi_list
+                    document.getElementById('log_load').innerHTML = r.replaceAll("\n", "<br />");
 
                 }).catch(function () {
                     setTimeout(function () {
@@ -129,33 +111,7 @@
                 })
         }
 
-        function connect() {
-
-            let cred = {
-                ssid: document.getElementById('ssid').value,
-                pass: document.getElementById('pass').value,
-            }
-
-            fetch('/wifi/set', {
-                method: "POST",
-                body: JSON.stringify(cred)
-            })
-                .then(function (x) {
-                    return x.json()
-                })
-                .then(function (r) {
-
-                    alert("Success!")
-
-                }).catch(function () {
-                    setTimeout(function () {
-                        alert('Error on request')
-                    }, 100)
-                })
-        }
-
-        setTimeout(() => searchHotspots(), 1500)
-        
+        setTimeout(() => getLog(), 1500)
     </script>
 </body>
 
